@@ -2,10 +2,15 @@
 
 [ext_resource type="Script" uid="uid://blfq67dgry35r" path="res://addons/gdgs/runtime/compositor/gaussian_compositor_effect.gd" id="1_7mycd"]
 [ext_resource type="PackedScene" uid="uid://baf20ongc8oe1" path="res://dandelion.tscn" id="2_7mycd"]
+[ext_resource type="Shader" uid="uid://bxc3o4i01bdbj" path="res://tiles/ground_blend.gdshader" id="2_efxa6"]
+[ext_resource type="Texture2D" uid="uid://de3ewe73ldsmq" path="res://tiles/textures/cobble.jpg" id="3_dg77c"]
 [ext_resource type="PackedScene" path="res://player.tscn" id="4_kek77"]
+[ext_resource type="Texture2D" uid="uid://di775tc4g8pni" path="res://tiles/textures/forest.jpg" id="4_ycdy4"]
+[ext_resource type="Texture2D" uid="uid://bx72gxpv8l66m" path="res://tiles/textures/grass.jpg" id="5_w48qg"]
 [ext_resource type="Script" uid="uid://4yv8v5k8d52h" path="res://isometric_camera.gd" id="6_efxa6"]
 [ext_resource type="PackedScene" path="res://cherry_tree.tscn" id="7_272bh"]
 [ext_resource type="Shader" uid="uid://dtm1jq7k8rfut" path="res://tilt_shift.gdshader" id="8_tilt"]
+[ext_resource type="Script" uid="uid://cl22sc53nf6gs" path="res://tiles/ground_grid.gd" id="9_tiles"]
 
 [sub_resource type="Environment" id="Environment_dg77c"]
 background_mode = 1
@@ -40,6 +45,47 @@ roughness = 0.85
 material = SubResource("StandardMaterial3D_2cqfq")
 size = Vector3(28, 1, 28)
 
+[sub_resource type="Image" id="Image_efxa6"]
+data = {
+"data": PackedByteArray(127, 0, 0, 127, 0, 0, 127, 0, 0, 127, 0, 0, 127, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 127, 0, 0, 127, 0, 0, 127, 0, 0, 127, 0, 0, 127, 0, 0, 0, 0, 0, 255, 0, 0, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 127, 0, 0, 127, 0, 0, 127, 0, 0, 127, 0, 0, 127, 0, 0, 0, 0, 0, 255, 0, 0, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 127, 0, 0, 127, 0, 0, 127, 0, 0, 127, 0, 0, 127, 0, 0, 0, 0, 0, 255, 0, 0, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 127, 0, 0, 127, 0, 0, 127, 0, 0, 127, 0, 0, 127, 0, 0, 0, 0, 0, 255, 0, 0, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 127, 0, 0, 127, 0, 0, 127, 0, 0, 127, 0, 0, 127, 0, 0, 0, 0, 0, 255, 0, 0, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 127, 0, 0, 127, 0, 0, 127, 0, 0, 127, 0, 0, 127, 0, 0, 0, 0, 0, 255, 0, 0, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 0, 0, 255, 0, 0, 255, 0, 0, 255, 0, 0, 255, 0, 0, 255, 0, 0, 255, 0, 0, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 0, 0, 255, 0, 0, 255, 0, 0, 255, 0, 0, 255, 0, 0, 255, 0, 0, 255, 0, 0, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 0, 0, 0, 0, 0, 255, 0, 0, 255, 0, 0, 255, 0, 0, 255, 0, 0, 255, 0, 0, 255, 0, 0, 127, 0, 0, 127, 0, 0, 127, 0, 0, 127, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 0, 0, 255, 0, 0, 127, 0, 0, 127, 0, 0, 127, 0, 0, 127, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 0, 0, 255, 0, 0, 127, 0, 0, 127, 0, 0, 127, 0, 0, 127, 0, 0, 0, 0, 0, 0, 0, 0, 127, 0, 0, 127, 0, 0, 127, 0, 0, 127, 0, 0, 127, 0, 0, 127, 0, 0, 255, 0, 0, 255, 0, 0, 127, 0, 0, 127, 0, 0, 127, 0, 0, 127, 0, 0, 0, 0, 0, 0, 0, 0, 127, 0, 0, 127, 0, 0, 127, 0, 0, 127, 0, 0, 127, 0, 0, 127, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+"format": "RGB8",
+"height": 14,
+"mipmaps": false,
+"width": 14
+}
+
+[sub_resource type="ImageTexture" id="ImageTexture_dg77c"]
+image = SubResource("Image_efxa6")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ycdy4"]
+render_priority = 0
+shader = ExtResource("2_efxa6")
+shader_parameter/terrain_ids = SubResource("ImageTexture_dg77c")
+shader_parameter/tex_grass = ExtResource("5_w48qg")
+shader_parameter/tex_forest = ExtResource("4_ycdy4")
+shader_parameter/tex_cobble = ExtResource("3_dg77c")
+shader_parameter/map_origin = Vector2(-14, -14)
+shader_parameter/cell_size = 2.0
+shader_parameter/uv_scale = 0.08333333333333333
+shader_parameter/blend_width = 0.1
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_w48qg"]
+material = SubResource("ShaderMaterial_ycdy4")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_vivmo"]
+material = SubResource("ShaderMaterial_ycdy4")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_2cqfq"]
+material = SubResource("ShaderMaterial_ycdy4")
+
+[sub_resource type="MeshLibrary" id="MeshLibrary_yaehf"]
+item/0/name = "Grass"
+item/0/mesh = SubResource("PlaneMesh_w48qg")
+item/1/name = "Forest"
+item/1/mesh = SubResource("PlaneMesh_vivmo")
+item/2/name = "Cobblestone"
+item/2/mesh = SubResource("PlaneMesh_2cqfq")
+
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_tilt"]
 shader = ExtResource("8_tilt")
 shader_parameter/blur_px = 5.5
@@ -64,8 +110,8 @@ shadow_bias = 0.04
 shadow_normal_bias = 1.5
 shadow_blur = 2.0
 directional_shadow_mode = 0
-directional_shadow_max_distance = 80.0
 directional_shadow_fade_start = 1.0
+directional_shadow_max_distance = 80.0
 
 [node name="Ground" type="StaticBody3D" parent="." unique_id=735853870]
 metadata/_edit_lock_ = true
@@ -77,7 +123,21 @@ shape = SubResource("BoxShape3D_vivmo")
 
 [node name="GroundMesh" type="MeshInstance3D" parent="Ground" unique_id=266323935]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+visible = false
 mesh = SubResource("BoxMesh_yaehf")
+
+[node name="GroundTiles" type="GridMap" parent="." unique_id=744226681]
+editor_description = "Select this node, then paint Grass / Forest / Cobblestone from the GridMap palette in the 3D viewport. Edges and corners blend between the two neighbouring materials."
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1)
+mesh_library = SubResource("MeshLibrary_yaehf")
+cell_size = Vector3(2, 1, 2)
+cell_center_y = false
+collision_layer = 0
+collision_mask = 0
+data = {
+"cells": PackedInt32Array(65529, 65529, 1, 65530, 65529, 1, 65531, 65529, 1, 65532, 65529, 1, 65533, 65529, 1, 65534, 65529, 0, 65535, 65529, 0, 0, 65529, 0, 1, 65529, 0, 2, 65529, 0, 3, 65529, 0, 4, 65529, 0, 5, 65529, 0, 6, 65529, 0, 65529, 65530, 1, 65530, 65530, 1, 65531, 65530, 1, 65532, 65530, 1, 65533, 65530, 1, 65534, 65530, 0, 65535, 65530, 2, 0, 65530, 2, 1, 65530, 0, 2, 65530, 0, 3, 65530, 0, 4, 65530, 0, 5, 65530, 0, 6, 65530, 0, 65529, 65531, 1, 65530, 65531, 1, 65531, 65531, 1, 65532, 65531, 1, 65533, 65531, 1, 65534, 65531, 0, 65535, 65531, 2, 0, 65531, 2, 1, 65531, 0, 2, 65531, 0, 3, 65531, 0, 4, 65531, 0, 5, 65531, 0, 6, 65531, 0, 65529, 65532, 1, 65530, 65532, 1, 65531, 65532, 1, 65532, 65532, 1, 65533, 65532, 1, 65534, 65532, 0, 65535, 65532, 2, 0, 65532, 2, 1, 65532, 0, 2, 65532, 0, 3, 65532, 0, 4, 65532, 0, 5, 65532, 0, 6, 65532, 0, 65529, 65533, 1, 65530, 65533, 1, 65531, 65533, 1, 65532, 65533, 1, 65533, 65533, 1, 65534, 65533, 0, 65535, 65533, 2, 0, 65533, 2, 1, 65533, 0, 2, 65533, 0, 3, 65533, 0, 4, 65533, 0, 5, 65533, 0, 6, 65533, 0, 65529, 65534, 1, 65530, 65534, 1, 65531, 65534, 1, 65532, 65534, 1, 65533, 65534, 1, 65534, 65534, 0, 65535, 65534, 2, 0, 65534, 2, 1, 65534, 0, 2, 65534, 0, 3, 65534, 0, 4, 65534, 0, 5, 65534, 0, 6, 65534, 0, 65529, 65535, 1, 65530, 65535, 1, 65531, 65535, 1, 65532, 65535, 1, 65533, 65535, 1, 65534, 65535, 0, 65535, 65535, 2, 0, 65535, 2, 1, 65535, 0, 2, 65535, 0, 3, 65535, 0, 4, 65535, 0, 5, 65535, 0, 6, 65535, 0, 65529, 0, 2, 65530, 0, 2, 65531, 0, 2, 65532, 0, 2, 65533, 0, 2, 65534, 0, 2, 65535, 0, 2, 0, 0, 2, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 0, 5, 0, 0, 6, 0, 0, 65529, 1, 2, 65530, 1, 2, 65531, 1, 2, 65532, 1, 2, 65533, 1, 2, 65534, 1, 2, 65535, 1, 2, 0, 1, 2, 1, 1, 0, 2, 1, 0, 3, 1, 0, 4, 1, 0, 5, 1, 0, 6, 1, 0, 65529, 2, 2, 65530, 2, 0, 65531, 2, 2, 65532, 2, 2, 65533, 2, 2, 65534, 2, 2, 65535, 2, 2, 0, 2, 2, 1, 2, 1, 2, 2, 1, 3, 2, 1, 4, 2, 1, 5, 2, 0, 6, 2, 0, 65529, 3, 0, 65530, 3, 0, 65531, 3, 0, 65532, 3, 0, 65533, 3, 0, 65534, 3, 0, 65535, 3, 2, 0, 3, 2, 1, 3, 1, 2, 3, 1, 3, 3, 1, 4, 3, 1, 5, 3, 0, 6, 3, 0, 65529, 4, 0, 65530, 4, 0, 65531, 4, 0, 65532, 4, 0, 65533, 4, 0, 65534, 4, 0, 65535, 4, 2, 0, 4, 2, 1, 4, 1, 2, 4, 1, 3, 4, 1, 4, 4, 1, 5, 4, 0, 6, 4, 0, 65529, 5, 1, 65530, 5, 1, 65531, 5, 1, 65532, 5, 1, 65533, 5, 1, 65534, 5, 1, 65535, 5, 2, 0, 5, 2, 1, 5, 1, 2, 5, 1, 3, 5, 1, 4, 5, 1, 5, 5, 0, 6, 5, 0, 65529, 6, 1, 65530, 6, 1, 65531, 6, 1, 65532, 6, 1, 65533, 6, 1, 65534, 6, 1, 65535, 6, 0, 0, 6, 0, 1, 6, 0, 2, 6, 0, 3, 6, 0, 4, 6, 0, 5, 6, 0, 6, 6, 0, 65528, 5, 1, 65528, 6, 1, 65533, 65520, 1, 65528, 65534, 1, 65528, 65533, 1, 65528, 65535, 2, 65528, 2, 0, 65528, 1, 0, 65528, 0, 0, 65528, 65532, 1, 65528, 65531, 1, 65528, 65530, 1, 65528, 65529, 1)
+}
+script = ExtResource("9_tiles")
 
 [node name="Plants" type="Node3D" parent="." unique_id=105825357]
 
@@ -95,9 +155,6 @@ near = 0.2
 far = 160.0
 script = ExtResource("6_efxa6")
 target = NodePath("../Player")
-distance = 24.0
-elevation_angle_deg = 34.0
-rotation_angle_deg = 0.0
 tilt_shift_rect = NodePath("../TiltShift/Blur")
 
 [node name="TiltShift" type="CanvasLayer" parent="." unique_id=788467170]
