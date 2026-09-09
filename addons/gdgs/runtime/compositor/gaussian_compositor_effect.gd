@@ -256,6 +256,17 @@ func _debug_view_needs_scene_depth(view: int) -> bool:
 	return view == DebugView.COMPOSITE or view == DebugView.SCENE_DEPTH or view == DebugView.DEPTH_REJECT_MASK
 
 func initialize_compute_shader() -> void:
+	# Compute compositing is Forward+-only. On Android Godot always runs the
+	# Mobile renderer, whose colour targets cannot be bound as storage images.
+	# Skip shader init so we don't spam RD errors while the Raster backend
+	# draws splats through the normal transparent pass.
+	var method := ""
+	if RenderingServer.has_method("get_current_rendering_method"):
+		method = str(RenderingServer.get_current_rendering_method())
+	if not method.is_empty() and method != "forward_plus":
+		print("[gdgs] compositor skipped (renderer is %s; Raster draws splats)" % method)
+		return
+
 	rd = RenderingServer.get_rendering_device()
 	if not rd:
 		return

@@ -22,12 +22,19 @@ func get_display_name() -> String:
 	return "Compute"
 
 func initialize(_tree: SceneTree) -> Dictionary:
-	# The Compute path needs a RenderingDevice (Forward+/Mobile). The selector
-	# already routes Auto to this backend only where compute can run, but keep a
-	# guard so an explicit "Compute" on a GL Compatibility project fails cleanly
-	# and falls back rather than spamming render-thread errors.
+	# The Compute path needs a RenderingDevice *and* Forward+. Mobile also has
+	# an RD (Vulkan), but its colour buffers are not storage images, so the
+	# compositor cannot composite splats. Fail the self-test so Auto/explicit
+	# Compute fall back to Raster instead of drawing only the shadow proxy.
 	if RenderingServer.get_rendering_device() == null:
 		return {"ok": false, "reason": "no RenderingDevice (compute unavailable on this renderer)"}
+	var method := ""
+	if RenderingServer.has_method("get_current_rendering_method"):
+		method = str(RenderingServer.get_current_rendering_method())
+	if method.is_empty():
+		method = str(ProjectSettings.get_setting_with_override("rendering/renderer/rendering_method"))
+	if method != "forward_plus":
+		return {"ok": false, "reason": "Compute compositor requires Forward+ (running '%s')" % method}
 	return {"ok": true}
 
 func attach_node(node: Node) -> void:

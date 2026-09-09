@@ -63,7 +63,13 @@ static func _resolve(tree: SceneTree) -> RefCounted:
 			continue
 		var result: Dictionary = backend.initialize(tree)
 		if bool(result.get("ok", false)):
-			print("[gdgs] rendering backend: %s" % backend.get_display_name())
+			var method := _current_rendering_method()
+			var driver := ""
+			if RenderingServer.has_method("get_current_rendering_driver_name"):
+				driver = str(RenderingServer.get_current_rendering_driver_name())
+			print("[gdgs] rendering backend: %s (renderer=%s, driver=%s, os=%s)" % [
+				backend.get_display_name(), method, driver, OS.get_name()
+			])
 			return backend
 		push_warning("[gdgs] backend '%s' failed self-test: %s" % [
 			kind, str(result.get("reason", "unknown"))
@@ -98,11 +104,24 @@ static func _candidate_order(setting: String) -> Array:
 
 ## Auto prefers Compute on Forward+ with a RenderingDevice (preserving current
 ## behavior for existing projects); Mobile/Compatibility prefer Raster.
+##
+## Must use the *runtime* renderer, not the desktop project tag. Godot keeps
+## `rendering/renderer/rendering_method` as `forward_plus` on Android and
+## overrides it to Mobile at startup (`rendering_method.mobile`). Reading the
+## raw setting makes Auto pick Compute on tablets, where the compositor cannot
+## write the scene colour target (no STORAGE_BIT) — shadows still show, splats
+## do not.
 static func _compute_preferred() -> bool:
 	if RenderingServer.get_rendering_device() == null:
 		return false
-	var method := str(ProjectSettings.get_setting("rendering/renderer/rendering_method", "forward_plus"))
-	return method == "forward_plus"
+	return _current_rendering_method() == "forward_plus"
+
+static func _current_rendering_method() -> String:
+	if RenderingServer.has_method("get_current_rendering_method"):
+		var current := str(RenderingServer.get_current_rendering_method())
+		if not current.is_empty():
+			return current
+	return str(ProjectSettings.get_setting_with_override("rendering/renderer/rendering_method"))
 
 static func _instantiate(kind: String) -> RefCounted:
 	var path := ""

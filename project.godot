@@ -24,6 +24,10 @@ window/stretch/aspect="expand"
 
 enabled=PackedStringArray("res://addons/gdgs/plugin.cfg")
 
+[gdgs]
+
+rendering/backend="Raster"
+
 [input_devices]
 
 joypads/ignore_joypad_on_unfocused_application=true
@@ -35,3 +39,7 @@ joypads/ignore_joypad_on_unfocused_application=true
 [rendering]
 
 rendering_device/driver.windows="d3d12"
+lights_and_shadows/directional_shadow/size=8192
+lights_and_shadows/directional_shadow/size.mobile=4096
+lights_and_shadows/directional_shadow/soft_shadow_filter_quality=4
+lights_and_shadows/directional_shadow/soft_shadow_filter_quality.mobile=3

@@ -1,12 +1,11 @@
 [gd_scene format=3 uid="uid://dxp7702f2dw3a"]
 
 [ext_resource type="Script" uid="uid://blfq67dgry35r" path="res://addons/gdgs/runtime/compositor/gaussian_compositor_effect.gd" id="1_7mycd"]
-[ext_resource type="Script" uid="uid://bonljuofac030" path="res://addons/gdgs/runtime/nodes/gaussian_splat_node.gd" id="2_272bh"]
-[ext_resource type="Resource" uid="uid://xrxmsgu4mioe" path="res://splats/löwenzahn.ply" id="3_5vw27"]
-[ext_resource type="Resource" path="res://splats/lowenzahn_lighting.res" id="4_5vw27"]
+[ext_resource type="PackedScene" uid="uid://baf20ongc8oe1" path="res://dandelion.tscn" id="2_7mycd"]
 [ext_resource type="PackedScene" path="res://player.tscn" id="4_kek77"]
 [ext_resource type="Script" uid="uid://4yv8v5k8d52h" path="res://isometric_camera.gd" id="6_efxa6"]
 [ext_resource type="PackedScene" path="res://cherry_tree.tscn" id="7_272bh"]
+[ext_resource type="Shader" uid="uid://dtm1jq7k8rfut" path="res://tilt_shift.gdshader" id="8_tilt"]
 
 [sub_resource type="Environment" id="Environment_dg77c"]
 background_mode = 1
@@ -41,33 +40,13 @@ roughness = 0.85
 material = SubResource("StandardMaterial3D_2cqfq")
 size = Vector3(28, 1, 28)
 
-[sub_resource type="CylinderShape3D" id="CylinderShape3D_074og"]
-height = 0.85
-radius = 0.25
-
-[sub_resource type="CylinderShape3D" id="CylinderShape3D_cegan"]
-height = 0.85
-radius = 0.25
-
-[sub_resource type="CylinderShape3D" id="CylinderShape3D_82xsv"]
-height = 0.85
-radius = 0.25
-
-[sub_resource type="CylinderShape3D" id="CylinderShape3D_getpj"]
-height = 0.85
-radius = 0.25
-
-[sub_resource type="CylinderShape3D" id="CylinderShape3D_ryguw"]
-height = 0.85
-radius = 0.25
-
-[sub_resource type="CylinderShape3D" id="CylinderShape3D_d13ii"]
-height = 0.85
-radius = 0.25
-
-[sub_resource type="CylinderShape3D" id="CylinderShape3D_1u8w0"]
-height = 0.85
-radius = 0.25
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_tilt"]
+shader = ExtResource("8_tilt")
+shader_parameter/blur_px = 5.5
+shader_parameter/focus_y = 0.58
+shader_parameter/focus_width = 0.14
+shader_parameter/focus_falloff = 0.26
+shader_parameter/top_heaviness = 1.35
 
 [node name="Main" type="Node3D" unique_id=1724918660]
 
@@ -79,11 +58,18 @@ compositor = SubResource("Compositor_w48qg")
 transform = Transform3D(0.81915206, -0.43938506, 0.36868784, 0, 0.64278764, 0.76604444, -0.57357645, -0.62750685, 0.5265408, 0, 0, 0)
 light_color = Color(1, 0.98, 0.92, 1)
 light_energy = 1.25
+light_angular_distance = 0.8
 shadow_enabled = true
-directional_shadow_blend_splits = true
-directional_shadow_max_distance = 45.0
+shadow_bias = 0.04
+shadow_normal_bias = 1.5
+shadow_blur = 2.0
+directional_shadow_mode = 0
+directional_shadow_max_distance = 80.0
+directional_shadow_fade_start = 1.0
 
 [node name="Ground" type="StaticBody3D" parent="." unique_id=735853870]
+metadata/_edit_lock_ = true
+metadata/_edit_group_ = true
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Ground" unique_id=827259546]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
@@ -95,218 +81,39 @@ mesh = SubResource("BoxMesh_yaehf")
 
 [node name="Plants" type="Node3D" parent="." unique_id=105825357]
 
-[node name="Lowenzahn_1" type="Node3D" parent="Plants" unique_id=2063301325]
+[node name="Lowenzahn_1" parent="Plants" unique_id=2078716132 instance=ExtResource("2_7mycd")]
 transform = Transform3D(1.0592201, 0, 0.44783106, 0, 1.15, 0, -0.44783106, 0, 1.0592201, -3.5, 0.0725, -2.5)
-
-[node name="GaussianSplatNode" type="VisualInstance3D" parent="Plants/Lowenzahn_1" unique_id=1662234135]
-unique_name_in_owner = false
-process_mode = 0
-process_priority = 0
-process_physics_priority = 0
-process_thread_group = 0
-physics_interpolation_mode = 0
-auto_translate_mode = 0
-editor_description = ""
-transform = Transform3D(-1, -8.742278e-08, 0, 8.742278e-08, -1, 0, 0, 0, 1, 0, 0.45, 0)
-rotation_edit_mode = 0
-rotation_order = 2
-top_level = false
-visible = true
-visibility_parent = NodePath("")
-layers = 1
-script = ExtResource("2_272bh")
-gaussian = ExtResource("3_5vw27")
-lighting = ExtResource("4_5vw27")
-
-[node name="StemCollision" type="StaticBody3D" parent="Plants/Lowenzahn_1" unique_id=852756946]
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Plants/Lowenzahn_1/StemCollision" unique_id=1695811131]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
-shape = SubResource("CylinderShape3D_074og")
-
-[node name="Lowenzahn_2" type="Node3D" parent="Plants" unique_id=7025434]
-transform = Transform3D(0.471065, 0, -1.2116507, 0, 1.3, 0, 1.2116507, 0, 0.471065, 4.2, 0.125, -3.2)
-
-[node name="GaussianSplatNode" type="VisualInstance3D" parent="Plants/Lowenzahn_2" unique_id=423853580]
-unique_name_in_owner = false
-process_mode = 0
-process_priority = 0
-process_physics_priority = 0
-process_thread_group = 0
-physics_interpolation_mode = 0
-auto_translate_mode = 0
-editor_description = ""
-transform = Transform3D(-1, -8.742278e-08, 0, 8.742278e-08, -1, 0, 0, 0, 1, 0, 0.45, 0)
-rotation_edit_mode = 0
-rotation_order = 2
-top_level = false
-visible = true
-visibility_parent = NodePath("")
-layers = 1
-script = ExtResource("2_272bh")
-gaussian = ExtResource("3_5vw27")
-lighting = ExtResource("4_5vw27")
-
-[node name="StemCollision" type="StaticBody3D" parent="Plants/Lowenzahn_2" unique_id=264625475]
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Plants/Lowenzahn_2/StemCollision" unique_id=1032704553]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
-shape = SubResource("CylinderShape3D_cegan")
-
-[node name="Lowenzahn_3" type="Node3D" parent="Plants" unique_id=226533027]
-transform = Transform3D(-0.47960374, 0, 0.8200489, 0, 0.95, 0, -0.8200489, 0, -0.47960374, -4.8, 0.02, 3.5)
-
-[node name="GaussianSplatNode" type="VisualInstance3D" parent="Plants/Lowenzahn_3" unique_id=1268830697]
-unique_name_in_owner = false
-process_mode = 0
-process_priority = 0
-process_physics_priority = 0
-process_thread_group = 0
-physics_interpolation_mode = 0
-auto_translate_mode = 0
-editor_description = ""
-transform = Transform3D(-1, -8.742278e-08, 0, 8.742278e-08, -1, 0, 0, 0, 1, 0, 0.45, 0)
-rotation_edit_mode = 0
-rotation_order = 2
-top_level = false
-visible = true
-visibility_parent = NodePath("")
-layers = 1
-script = ExtResource("2_272bh")
-gaussian = ExtResource("3_5vw27")
-lighting = ExtResource("4_5vw27")
-
-[node name="StemCollision" type="StaticBody3D" parent="Plants/Lowenzahn_3" unique_id=640587553]
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Plants/Lowenzahn_3/StemCollision" unique_id=263183476]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
-shape = SubResource("CylinderShape3D_82xsv")
-
-[node name="Lowenzahn_4" type="Node3D" parent="Plants" unique_id=927393267]
-transform = Transform3D(0.67537785, 0, 1.0518386, 0, 1.25, 0, -1.0518386, 0, 0.67537785, 3.5, 0.1075, 4.2)
-
-[node name="GaussianSplatNode" type="VisualInstance3D" parent="Plants/Lowenzahn_4" unique_id=1106079199]
-unique_name_in_owner = false
-process_mode = 0
-process_priority = 0
-process_physics_priority = 0
-process_thread_group = 0
-physics_interpolation_mode = 0
-auto_translate_mode = 0
-editor_description = ""
-transform = Transform3D(-1, -8.742278e-08, 0, 8.742278e-08, -1, 0, 0, 0, 1, 0, 0.45, 0)
-rotation_edit_mode = 0
-rotation_order = 2
-top_level = false
-visible = true
-visibility_parent = NodePath("")
-layers = 1
-script = ExtResource("2_272bh")
-gaussian = ExtResource("3_5vw27")
-lighting = ExtResource("4_5vw27")
-
-[node name="StemCollision" type="StaticBody3D" parent="Plants/Lowenzahn_4" unique_id=1806287691]
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Plants/Lowenzahn_4/StemCollision" unique_id=858993396]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
-shape = SubResource("CylinderShape3D_getpj")
-
-[node name="Lowenzahn_5" type="Node3D" parent="Plants" unique_id=862415691]
-transform = Transform3D(1.2286155, 0, -0.67119575, 0, 1.4, 0, 0.67119575, 0, 1.2286155, 2.5, 0.16, -4.5)
-
-[node name="GaussianSplatNode" type="VisualInstance3D" parent="Plants/Lowenzahn_5" unique_id=132909213]
-unique_name_in_owner = false
-process_mode = 0
-process_priority = 0
-process_physics_priority = 0
-process_thread_group = 0
-physics_interpolation_mode = 0
-auto_translate_mode = 0
-editor_description = ""
-transform = Transform3D(-1, -8.742278e-08, 0, 8.742278e-08, -1, 0, 0, 0, 1, 0, 0.45, 0)
-rotation_edit_mode = 0
-rotation_order = 2
-top_level = false
-visible = true
-visibility_parent = NodePath("")
-layers = 1
-script = ExtResource("2_272bh")
-gaussian = ExtResource("3_5vw27")
-lighting = ExtResource("4_5vw27")
-
-[node name="StemCollision" type="StaticBody3D" parent="Plants/Lowenzahn_5" unique_id=1876376241]
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Plants/Lowenzahn_5/StemCollision" unique_id=776184624]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
-shape = SubResource("CylinderShape3D_ryguw")
-
-[node name="Lowenzahn_6" type="Node3D" parent="Plants" unique_id=15399251]
-transform = Transform3D(-1.0394921, 0, 0.148176, 0, 1.05, 0, -0.148176, 0, -1.0394921, -6.2, 0.0375, -0.5)
-
-[node name="GaussianSplatNode" type="VisualInstance3D" parent="Plants/Lowenzahn_6" unique_id=1187220192]
-unique_name_in_owner = false
-process_mode = 0
-process_priority = 0
-process_physics_priority = 0
-process_thread_group = 0
-physics_interpolation_mode = 0
-auto_translate_mode = 0
-editor_description = ""
-transform = Transform3D(-1, -8.742278e-08, 0, 8.742278e-08, -1, 0, 0, 0, 1, 0, 0.45, 0)
-rotation_edit_mode = 0
-rotation_order = 2
-top_level = false
-visible = true
-visibility_parent = NodePath("")
-layers = 1
-script = ExtResource("2_272bh")
-gaussian = ExtResource("3_5vw27")
-lighting = ExtResource("4_5vw27")
-
-[node name="StemCollision" type="StaticBody3D" parent="Plants/Lowenzahn_6" unique_id=1559905467]
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Plants/Lowenzahn_6/StemCollision" unique_id=1300260474]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
-shape = SubResource("CylinderShape3D_d13ii")
-
-[node name="Lowenzahn_7" type="Node3D" parent="Plants" unique_id=1552786134]
-transform = Transform3D(0.83604807, 0, 0.8608273, 0, 1.2, 0, -0.8608273, 0, 0.83604807, 5.8, 0.09, 1.2)
-
-[node name="GaussianSplatNode" type="VisualInstance3D" parent="Plants/Lowenzahn_7" unique_id=568542804]
-unique_name_in_owner = false
-process_mode = 0
-process_priority = 0
-process_physics_priority = 0
-process_thread_group = 0
-physics_interpolation_mode = 0
-auto_translate_mode = 0
-editor_description = ""
-transform = Transform3D(-1, -8.742278e-08, 0, 8.742278e-08, -1, 0, 0, 0, 1, 0, 0.45, 0)
-rotation_edit_mode = 0
-rotation_order = 2
-top_level = false
-visible = true
-visibility_parent = NodePath("")
-layers = 1
-script = ExtResource("2_272bh")
-gaussian = ExtResource("3_5vw27")
-lighting = ExtResource("4_5vw27")
-
-[node name="StemCollision" type="StaticBody3D" parent="Plants/Lowenzahn_7" unique_id=1769620026]
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Plants/Lowenzahn_7/StemCollision" unique_id=1241566090]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
-shape = SubResource("CylinderShape3D_1u8w0")
 
 [node name="Player" parent="." unique_id=1511051396 instance=ExtResource("4_kek77")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5)
 
-[node name="IsometricCamera" type="Camera3D" parent="." unique_id=1636770512 node_paths=PackedStringArray("target")]
-transform = Transform3D(0.70710677, -0.3821209, 0.5949652, 0, 0.8414079, 0.54040056, -0.70710677, -0.3821209, 0.5949652, 9.8150015, 9.81486, 10.3150015)
+[node name="DioramaCamera" type="Camera3D" parent="." unique_id=1636770512 node_paths=PackedStringArray("target", "tilt_shift_rect")]
+transform = Transform3D(1, 0, 0, 0, 0.8290376, 0.559193, 0, -0.559193, 0.8290376, 0, 13.42, 20.41)
 current = true
+fov = 26.0
+near = 0.2
+far = 160.0
 script = ExtResource("6_efxa6")
 target = NodePath("../Player")
-distance = 17.0
+distance = 24.0
+elevation_angle_deg = 34.0
+rotation_angle_deg = 0.0
+tilt_shift_rect = NodePath("../TiltShift/Blur")
+
+[node name="TiltShift" type="CanvasLayer" parent="." unique_id=788467170]
+layer = 10
+
+[node name="Blur" type="ColorRect" parent="TiltShift" unique_id=896718219]
+material = SubResource("ShaderMaterial_tilt")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
 
 [node name="CherryTree" parent="." unique_id=1002688297 instance=ExtResource("7_272bh")]
 transform = Transform3D(8.7758255, 0, 4.7942553, 0, 10, 0, -4.7942553, 0, 8.7758255, -2.5, 0, -7.05291)
+
+[node name="CherryTree2" parent="." unique_id=599717538 instance=ExtResource("7_272bh")]
+transform = Transform3D(-4.8858805, 0, 8.725145, 0, 10, 0, -8.725145, 0, -4.8858805, 4.561661, 0, 7.568206)

@@ -1,0 +1,38 @@
+[gd_scene format=3 uid="uid://baf20ongc8oe1"]
+
+[ext_resource type="Script" uid="uid://bonljuofac030" path="res://addons/gdgs/runtime/nodes/gaussian_splat_node.gd" id="1_4yph7"]
+[ext_resource type="Resource" uid="uid://xrxmsgu4mioe" path="res://splats/löwenzahn.ply" id="2_meyvq"]
+[ext_resource type="Resource" path="res://splats/lowenzahn_lighting.res" id="3_kc4uy"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_074og"]
+height = 0.85
+radius = 0.25
+
+[node name="Lowenzahn_1" type="Node3D" unique_id=2078716132]
+transform = Transform3D(1.0592201, 0, 0.44783106, 0, 1.15, 0, -0.44783106, 0, 1.0592201, 0, 0, 0)
+
+[node name="GaussianSplatNode" type="VisualInstance3D" parent="." unique_id=35035392]
+unique_name_in_owner = false
+process_mode = 0
+process_priority = 0
+process_physics_priority = 0
+process_thread_group = 0
+physics_interpolation_mode = 0
+auto_translate_mode = 0
+editor_description = ""
+transform = Transform3D(-1, -8.742278e-08, 0, 8.742278e-08, -1, 0, 0, 0, 1, 0, 0.45, 0)
+rotation_edit_mode = 0
+rotation_order = 2
+top_level = false
+visible = true
+visibility_parent = NodePath("")
+layers = 1
+script = ExtResource("1_4yph7")
+gaussian = ExtResource("2_meyvq")
+lighting = ExtResource("3_kc4uy")
+
+[node name="StemCollision" type="StaticBody3D" parent="." unique_id=21928264]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StemCollision" unique_id=669219530]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+shape = SubResource("CylinderShape3D_074og")
