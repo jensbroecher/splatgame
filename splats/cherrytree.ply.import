@@ -1,0 +1,15 @@
+[remap]
+
+importer="gaussian.splat.importer"
+importer_version=5
+type="Resource"
+uid="uid://c5sn2pcekms6d"
+path="res://.godot/imported/cherrytree.ply-e3dd943b44f10f3dd00ef503057813c9.res"
+
+[deps]
+
+source_file="res://splats/cherrytree.ply"
+dest_files=["res://.godot/imported/cherrytree.ply-e3dd943b44f10f3dd00ef503057813c9.res"]
+
+[params]
+

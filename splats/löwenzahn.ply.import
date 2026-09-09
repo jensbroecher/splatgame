@@ -1,0 +1,15 @@
+[remap]
+
+importer="gaussian.splat.importer"
+importer_version=5
+type="Resource"
+uid="uid://xrxmsgu4mioe"
+path="res://.godot/imported/löwenzahn.ply-89612726e611e570ae999cd9049778e3.res"
+
+[deps]
+
+source_file="res://splats/löwenzahn.ply"
+dest_files=["res://.godot/imported/löwenzahn.ply-89612726e611e570ae999cd9049778e3.res"]
+
+[params]
+

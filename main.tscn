@@ -1,0 +1,312 @@
+[gd_scene format=3 uid="uid://dxp7702f2dw3a"]
+
+[ext_resource type="Script" uid="uid://blfq67dgry35r" path="res://addons/gdgs/runtime/compositor/gaussian_compositor_effect.gd" id="1_7mycd"]
+[ext_resource type="Script" uid="uid://bonljuofac030" path="res://addons/gdgs/runtime/nodes/gaussian_splat_node.gd" id="2_272bh"]
+[ext_resource type="Resource" uid="uid://xrxmsgu4mioe" path="res://splats/löwenzahn.ply" id="3_5vw27"]
+[ext_resource type="Resource" path="res://splats/lowenzahn_lighting.res" id="4_5vw27"]
+[ext_resource type="PackedScene" path="res://player.tscn" id="4_kek77"]
+[ext_resource type="Script" uid="uid://4yv8v5k8d52h" path="res://isometric_camera.gd" id="6_efxa6"]
+[ext_resource type="PackedScene" path="res://cherry_tree.tscn" id="7_272bh"]
+
+[sub_resource type="Environment" id="Environment_dg77c"]
+background_mode = 1
+background_color = Color(0.18, 0.22, 0.28, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.65, 0.7, 0.78, 1)
+tonemap_mode = 2
+
+[sub_resource type="CompositorEffect" id="CompositorEffect_ycdy4"]
+resource_local_to_scene = false
+resource_name = ""
+enabled = true
+effect_callback_type = 3
+access_resolved_color = false
+access_resolved_depth = true
+needs_motion_vectors = false
+needs_normal_roughness = false
+script = ExtResource("1_7mycd")
+depth_bias = 0.08
+
+[sub_resource type="Compositor" id="Compositor_w48qg"]
+compositor_effects = Array[CompositorEffect]([SubResource("CompositorEffect_ycdy4")])
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_vivmo"]
+size = Vector3(28, 1, 28)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2cqfq"]
+albedo_color = Color(0.34, 0.55, 0.3, 1)
+roughness = 0.85
+
+[sub_resource type="BoxMesh" id="BoxMesh_yaehf"]
+material = SubResource("StandardMaterial3D_2cqfq")
+size = Vector3(28, 1, 28)
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_074og"]
+height = 0.85
+radius = 0.25
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_cegan"]
+height = 0.85
+radius = 0.25
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_82xsv"]
+height = 0.85
+radius = 0.25
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_getpj"]
+height = 0.85
+radius = 0.25
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_ryguw"]
+height = 0.85
+radius = 0.25
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_d13ii"]
+height = 0.85
+radius = 0.25
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_1u8w0"]
+height = 0.85
+radius = 0.25
+
+[node name="Main" type="Node3D" unique_id=1724918660]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=740860194]
+environment = SubResource("Environment_dg77c")
+compositor = SubResource("Compositor_w48qg")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=158046486]
+transform = Transform3D(0.81915206, -0.43938506, 0.36868784, 0, 0.64278764, 0.76604444, -0.57357645, -0.62750685, 0.5265408, 0, 0, 0)
+light_color = Color(1, 0.98, 0.92, 1)
+light_energy = 1.25
+shadow_enabled = true
+directional_shadow_blend_splits = true
+directional_shadow_max_distance = 45.0
+
+[node name="Ground" type="StaticBody3D" parent="." unique_id=735853870]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground" unique_id=827259546]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+shape = SubResource("BoxShape3D_vivmo")
+
+[node name="GroundMesh" type="MeshInstance3D" parent="Ground" unique_id=266323935]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+mesh = SubResource("BoxMesh_yaehf")
+
+[node name="Plants" type="Node3D" parent="." unique_id=105825357]
+
+[node name="Lowenzahn_1" type="Node3D" parent="Plants" unique_id=2063301325]
+transform = Transform3D(1.0592201, 0, 0.44783106, 0, 1.15, 0, -0.44783106, 0, 1.0592201, -3.5, 0.0725, -2.5)
+
+[node name="GaussianSplatNode" type="VisualInstance3D" parent="Plants/Lowenzahn_1" unique_id=1662234135]
+unique_name_in_owner = false
+process_mode = 0
+process_priority = 0
+process_physics_priority = 0
+process_thread_group = 0
+physics_interpolation_mode = 0
+auto_translate_mode = 0
+editor_description = ""
+transform = Transform3D(-1, -8.742278e-08, 0, 8.742278e-08, -1, 0, 0, 0, 1, 0, 0.45, 0)
+rotation_edit_mode = 0
+rotation_order = 2
+top_level = false
+visible = true
+visibility_parent = NodePath("")
+layers = 1
+script = ExtResource("2_272bh")
+gaussian = ExtResource("3_5vw27")
+lighting = ExtResource("4_5vw27")
+
+[node name="StemCollision" type="StaticBody3D" parent="Plants/Lowenzahn_1" unique_id=852756946]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Plants/Lowenzahn_1/StemCollision" unique_id=1695811131]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+shape = SubResource("CylinderShape3D_074og")
+
+[node name="Lowenzahn_2" type="Node3D" parent="Plants" unique_id=7025434]
+transform = Transform3D(0.471065, 0, -1.2116507, 0, 1.3, 0, 1.2116507, 0, 0.471065, 4.2, 0.125, -3.2)
+
+[node name="GaussianSplatNode" type="VisualInstance3D" parent="Plants/Lowenzahn_2" unique_id=423853580]
+unique_name_in_owner = false
+process_mode = 0
+process_priority = 0
+process_physics_priority = 0
+process_thread_group = 0
+physics_interpolation_mode = 0
+auto_translate_mode = 0
+editor_description = ""
+transform = Transform3D(-1, -8.742278e-08, 0, 8.742278e-08, -1, 0, 0, 0, 1, 0, 0.45, 0)
+rotation_edit_mode = 0
+rotation_order = 2
+top_level = false
+visible = true
+visibility_parent = NodePath("")
+layers = 1
+script = ExtResource("2_272bh")
+gaussian = ExtResource("3_5vw27")
+lighting = ExtResource("4_5vw27")
+
+[node name="StemCollision" type="StaticBody3D" parent="Plants/Lowenzahn_2" unique_id=264625475]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Plants/Lowenzahn_2/StemCollision" unique_id=1032704553]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+shape = SubResource("CylinderShape3D_cegan")
+
+[node name="Lowenzahn_3" type="Node3D" parent="Plants" unique_id=226533027]
+transform = Transform3D(-0.47960374, 0, 0.8200489, 0, 0.95, 0, -0.8200489, 0, -0.47960374, -4.8, 0.02, 3.5)
+
+[node name="GaussianSplatNode" type="VisualInstance3D" parent="Plants/Lowenzahn_3" unique_id=1268830697]
+unique_name_in_owner = false
+process_mode = 0
+process_priority = 0
+process_physics_priority = 0
+process_thread_group = 0
+physics_interpolation_mode = 0
+auto_translate_mode = 0
+editor_description = ""
+transform = Transform3D(-1, -8.742278e-08, 0, 8.742278e-08, -1, 0, 0, 0, 1, 0, 0.45, 0)
+rotation_edit_mode = 0
+rotation_order = 2
+top_level = false
+visible = true
+visibility_parent = NodePath("")
+layers = 1
+script = ExtResource("2_272bh")
+gaussian = ExtResource("3_5vw27")
+lighting = ExtResource("4_5vw27")
+
+[node name="StemCollision" type="StaticBody3D" parent="Plants/Lowenzahn_3" unique_id=640587553]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Plants/Lowenzahn_3/StemCollision" unique_id=263183476]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+shape = SubResource("CylinderShape3D_82xsv")
+
+[node name="Lowenzahn_4" type="Node3D" parent="Plants" unique_id=927393267]
+transform = Transform3D(0.67537785, 0, 1.0518386, 0, 1.25, 0, -1.0518386, 0, 0.67537785, 3.5, 0.1075, 4.2)
+
+[node name="GaussianSplatNode" type="VisualInstance3D" parent="Plants/Lowenzahn_4" unique_id=1106079199]
+unique_name_in_owner = false
+process_mode = 0
+process_priority = 0
+process_physics_priority = 0
+process_thread_group = 0
+physics_interpolation_mode = 0
+auto_translate_mode = 0
+editor_description = ""
+transform = Transform3D(-1, -8.742278e-08, 0, 8.742278e-08, -1, 0, 0, 0, 1, 0, 0.45, 0)
+rotation_edit_mode = 0
+rotation_order = 2
+top_level = false
+visible = true
+visibility_parent = NodePath("")
+layers = 1
+script = ExtResource("2_272bh")
+gaussian = ExtResource("3_5vw27")
+lighting = ExtResource("4_5vw27")
+
+[node name="StemCollision" type="StaticBody3D" parent="Plants/Lowenzahn_4" unique_id=1806287691]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Plants/Lowenzahn_4/StemCollision" unique_id=858993396]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+shape = SubResource("CylinderShape3D_getpj")
+
+[node name="Lowenzahn_5" type="Node3D" parent="Plants" unique_id=862415691]
+transform = Transform3D(1.2286155, 0, -0.67119575, 0, 1.4, 0, 0.67119575, 0, 1.2286155, 2.5, 0.16, -4.5)
+
+[node name="GaussianSplatNode" type="VisualInstance3D" parent="Plants/Lowenzahn_5" unique_id=132909213]
+unique_name_in_owner = false
+process_mode = 0
+process_priority = 0
+process_physics_priority = 0
+process_thread_group = 0
+physics_interpolation_mode = 0
+auto_translate_mode = 0
+editor_description = ""
+transform = Transform3D(-1, -8.742278e-08, 0, 8.742278e-08, -1, 0, 0, 0, 1, 0, 0.45, 0)
+rotation_edit_mode = 0
+rotation_order = 2
+top_level = false
+visible = true
+visibility_parent = NodePath("")
+layers = 1
+script = ExtResource("2_272bh")
+gaussian = ExtResource("3_5vw27")
+lighting = ExtResource("4_5vw27")
+
+[node name="StemCollision" type="StaticBody3D" parent="Plants/Lowenzahn_5" unique_id=1876376241]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Plants/Lowenzahn_5/StemCollision" unique_id=776184624]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+shape = SubResource("CylinderShape3D_ryguw")
+
+[node name="Lowenzahn_6" type="Node3D" parent="Plants" unique_id=15399251]
+transform = Transform3D(-1.0394921, 0, 0.148176, 0, 1.05, 0, -0.148176, 0, -1.0394921, -6.2, 0.0375, -0.5)
+
+[node name="GaussianSplatNode" type="VisualInstance3D" parent="Plants/Lowenzahn_6" unique_id=1187220192]
+unique_name_in_owner = false
+process_mode = 0
+process_priority = 0
+process_physics_priority = 0
+process_thread_group = 0
+physics_interpolation_mode = 0
+auto_translate_mode = 0
+editor_description = ""
+transform = Transform3D(-1, -8.742278e-08, 0, 8.742278e-08, -1, 0, 0, 0, 1, 0, 0.45, 0)
+rotation_edit_mode = 0
+rotation_order = 2
+top_level = false
+visible = true
+visibility_parent = NodePath("")
+layers = 1
+script = ExtResource("2_272bh")
+gaussian = ExtResource("3_5vw27")
+lighting = ExtResource("4_5vw27")
+
+[node name="StemCollision" type="StaticBody3D" parent="Plants/Lowenzahn_6" unique_id=1559905467]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Plants/Lowenzahn_6/StemCollision" unique_id=1300260474]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+shape = SubResource("CylinderShape3D_d13ii")
+
+[node name="Lowenzahn_7" type="Node3D" parent="Plants" unique_id=1552786134]
+transform = Transform3D(0.83604807, 0, 0.8608273, 0, 1.2, 0, -0.8608273, 0, 0.83604807, 5.8, 0.09, 1.2)
+
+[node name="GaussianSplatNode" type="VisualInstance3D" parent="Plants/Lowenzahn_7" unique_id=568542804]
+unique_name_in_owner = false
+process_mode = 0
+process_priority = 0
+process_physics_priority = 0
+process_thread_group = 0
+physics_interpolation_mode = 0
+auto_translate_mode = 0
+editor_description = ""
+transform = Transform3D(-1, -8.742278e-08, 0, 8.742278e-08, -1, 0, 0, 0, 1, 0, 0.45, 0)
+rotation_edit_mode = 0
+rotation_order = 2
+top_level = false
+visible = true
+visibility_parent = NodePath("")
+layers = 1
+script = ExtResource("2_272bh")
+gaussian = ExtResource("3_5vw27")
+lighting = ExtResource("4_5vw27")
+
+[node name="StemCollision" type="StaticBody3D" parent="Plants/Lowenzahn_7" unique_id=1769620026]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Plants/Lowenzahn_7/StemCollision" unique_id=1241566090]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
+shape = SubResource("CylinderShape3D_1u8w0")
+
+[node name="Player" parent="." unique_id=1511051396 instance=ExtResource("4_kek77")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5)
+
+[node name="IsometricCamera" type="Camera3D" parent="." unique_id=1636770512 node_paths=PackedStringArray("target")]
+transform = Transform3D(0.70710677, -0.3821209, 0.5949652, 0, 0.8414079, 0.54040056, -0.70710677, -0.3821209, 0.5949652, 9.8150015, 9.81486, 10.3150015)
+current = true
+script = ExtResource("6_efxa6")
+target = NodePath("../Player")
+distance = 17.0
+
+[node name="CherryTree" parent="." unique_id=1002688297 instance=ExtResource("7_272bh")]
+transform = Transform3D(8.7758255, 0, 4.7942553, 0, 10, 0, -4.7942553, 0, 8.7758255, -2.5, 0, -7.05291)
