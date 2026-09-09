@@ -1,0 +1,11 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://addons/gdgs/runtime/nodes/gaussian_splat_node.gd" id="1_gs"]
+[ext_resource type="Resource" uid="uid://c0hf0hc08x33a" path="res://splats/grass.splat" id="2_splat"]
+
+[node name="GrassClump" type="Node3D"]
+
+[node name="GaussianSplatNode" type="VisualInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.08, 0)
+script = ExtResource("1_gs")
+gaussian = ExtResource("2_splat")

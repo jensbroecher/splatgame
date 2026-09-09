@@ -1,0 +1,15 @@
+[remap]
+
+importer="gaussian.splat.importer"
+importer_version=5
+type="Resource"
+uid="uid://dq3ut84ut1ivx"
+path="res://.godot/imported/needletree.splat-c09f3733e3e9561c3e36af015c5fde61.res"
+
+[deps]
+
+source_file="res://splats/needletree.splat"
+dest_files=["res://.godot/imported/needletree.splat-c09f3733e3e9561c3e36af015c5fde61.res"]
+
+[params]
+

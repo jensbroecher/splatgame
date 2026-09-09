@@ -1,0 +1,20 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://addons/gdgs/runtime/nodes/gaussian_splat_node.gd" id="1_gs"]
+[ext_resource type="Resource" uid="uid://m8wmw27d7xlb" path="res://splats/rocks.splat" id="2_splat"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_rock"]
+size = Vector3(0.7, 0.4, 0.7)
+
+[node name="Rocks" type="Node3D"]
+
+[node name="GaussianSplatNode" type="VisualInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.15, 0)
+script = ExtResource("1_gs")
+gaussian = ExtResource("2_splat")
+
+[node name="RockCollision" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RockCollision"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0)
+shape = SubResource("BoxShape3D_rock")

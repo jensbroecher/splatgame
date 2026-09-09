@@ -1,0 +1,15 @@
+[remap]
+
+importer="gaussian.splat.importer"
+importer_version=5
+type="Resource"
+uid="uid://3qqd6j3wgtrl"
+path="res://.godot/imported/flower.splat-8a83c11b166648db54cf0ccbe20349be.res"
+
+[deps]
+
+source_file="res://splats/flower.splat"
+dest_files=["res://.godot/imported/flower.splat-8a83c11b166648db54cf0ccbe20349be.res"]
+
+[params]
+

@@ -1,0 +1,15 @@
+[remap]
+
+importer="gaussian.splat.importer"
+importer_version=5
+type="Resource"
+uid="uid://m8wmw27d7xlb"
+path="res://.godot/imported/rocks.splat-0510b56e37b9ded5561a8499d6e5cd70.res"
+
+[deps]
+
+source_file="res://splats/rocks.splat"
+dest_files=["res://.godot/imported/rocks.splat-0510b56e37b9ded5561a8499d6e5cd70.res"]
+
+[params]
+

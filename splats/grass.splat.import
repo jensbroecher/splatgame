@@ -1,0 +1,15 @@
+[remap]
+
+importer="gaussian.splat.importer"
+importer_version=5
+type="Resource"
+uid="uid://c0hf0hc08x33a"
+path="res://.godot/imported/grass.splat-9f5171e2171b559a9ca7e41c97676dee.res"
+
+[deps]
+
+source_file="res://splats/grass.splat"
+dest_files=["res://.godot/imported/grass.splat-9f5171e2171b559a9ca7e41c97676dee.res"]
+
+[params]
+
