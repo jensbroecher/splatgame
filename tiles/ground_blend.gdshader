@@ -10,17 +10,25 @@ uniform sampler2D tex_forest : source_color, filter_linear_mipmap, repeat_enable
 uniform sampler2D tex_cobble : source_color, filter_linear_mipmap, repeat_enable;
 uniform vec2 map_origin = vec2(-14.0, -14.0);
 uniform float cell_size = 2.0;
+uniform float elevation_step = 1.0;
 uniform float uv_scale = 0.12;
 uniform float blend_width = 0.1;
 
 varying vec3 v_world;
 
-int fetch_id(ivec2 c) {
+// .x = terrain id (255 = empty), .y = GridMap cell.y
+ivec2 fetch_cell(ivec2 c) {
 	ivec2 sz = textureSize(terrain_ids, 0);
 	if (c.x < 0 || c.y < 0 || c.x >= sz.x || c.y >= sz.y) {
-		return 255;
+		return ivec2(255, -999);
 	}
-	return int(texelFetch(terrain_ids, c, 0).r * 255.0 + 0.5);
+	vec4 pix = texelFetch(terrain_ids, c, 0);
+	int id = int(pix.r * 255.0 + 0.5);
+	if (id == 255) {
+		return ivec2(255, -999);
+	}
+	int hy = int(pix.g * 255.0 + 0.5) - 128;
+	return ivec2(id, hy);
 }
 
 vec4 mat_grass(vec2 uv) {
@@ -99,25 +107,32 @@ void fragment() {
 	ivec2 i01 = i00 + ivec2(0, 1);
 	ivec2 i11 = i00 + ivec2(1, 1);
 	vec2 uv = v_world.xz * uv_scale;
-	int id00 = fetch_id(i00);
-	int id10 = fetch_id(i10);
-	int id01 = fetch_id(i01);
-	int id11 = fetch_id(i11);
-	vec4 t00 = cell_sample(id00, uv, clamp(p - vec2(i00), vec2(0.0), vec2(1.0)));
-	vec4 t10 = cell_sample(id10, uv, clamp(p - vec2(i10), vec2(0.0), vec2(1.0)));
-	vec4 t01 = cell_sample(id01, uv, clamp(p - vec2(i01), vec2(0.0), vec2(1.0)));
-	vec4 t11 = cell_sample(id11, uv, clamp(p - vec2(i11), vec2(0.0), vec2(1.0)));
-	if (id10 == 255) {
-		t10 = t00;
+	ivec2 self_c = ivec2(floor(p));
+	ivec2 self = fetch_cell(self_c);
+	if (self.x == 255) {
+		self_c = ivec2(floor(max(p - vec2(0.001), vec2(0.0))));
+		self = fetch_cell(self_c);
 	}
-	if (id01 == 255) {
-		t01 = t00;
+	vec4 t_self = cell_sample(self.x, uv, clamp(p - vec2(self_c), vec2(0.0), vec2(1.0)));
+	ivec2 c00 = fetch_cell(i00);
+	ivec2 c10 = fetch_cell(i10);
+	ivec2 c01 = fetch_cell(i01);
+	ivec2 c11 = fetch_cell(i11);
+	vec4 t00 = t_self;
+	vec4 t10 = t_self;
+	vec4 t01 = t_self;
+	vec4 t11 = t_self;
+	if (c00.x != 255 && c00.y == self.y) {
+		t00 = cell_sample(c00.x, uv, clamp(p - vec2(i00), vec2(0.0), vec2(1.0)));
 	}
-	if (id11 == 255) {
-		t11 = t00;
+	if (c10.x != 255 && c10.y == self.y) {
+		t10 = cell_sample(c10.x, uv, clamp(p - vec2(i10), vec2(0.0), vec2(1.0)));
 	}
-	if (id00 == 255) {
-		t00 = t10;
+	if (c01.x != 255 && c01.y == self.y) {
+		t01 = cell_sample(c01.x, uv, clamp(p - vec2(i01), vec2(0.0), vec2(1.0)));
+	}
+	if (c11.x != 255 && c11.y == self.y) {
+		t11 = cell_sample(c11.x, uv, clamp(p - vec2(i11), vec2(0.0), vec2(1.0)));
 	}
 	vec4 t0 = mix(t00, t10, b.x);
 	vec4 t1 = mix(t01, t11, b.x);

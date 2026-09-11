@@ -243,6 +243,7 @@ func _make_material() -> ShaderMaterial:
 	mat.set_shader_parameter("tex_cobble", _load_tex(TEX_PATHS[2]))
 	mat.set_shader_parameter("map_origin", Vector2.ZERO)
 	mat.set_shader_parameter("cell_size", CELL)
+	mat.set_shader_parameter("elevation_step", cell_size.y)
 	mat.set_shader_parameter("uv_scale", 1.0 / texture_world_size)
 	mat.set_shader_parameter("blend_width", blend_width)
 	return mat
@@ -343,13 +344,18 @@ func _rebuild_id_map() -> void:
 		var id := get_cell_item(cell)
 		if id < 0 or id >= NAMES.size():
 			continue
-		img.set_pixel(cell.x - min_x, cell.z - min_z, Color(float(id) / 255.0, 0.0, 0.0))
+		img.set_pixel(
+			cell.x - min_x,
+			cell.z - min_z,
+			Color(float(id) / 255.0, float(cell.y + 128) / 255.0, 0.0)
+		)
 	_id_tex = ImageTexture.create_from_image(img)
 	if _material != null:
 		var origin := to_global(Vector3(float(min_x) * CELL, 0.0, float(min_z) * CELL))
 		_material.set_shader_parameter("terrain_ids", _id_tex)
 		_material.set_shader_parameter("map_origin", Vector2(origin.x, origin.z))
 		_material.set_shader_parameter("cell_size", CELL)
+		_material.set_shader_parameter("elevation_step", cell_size.y)
 	_rebuild_volume(cells)
 	_last_hash = _cells_hash()
 

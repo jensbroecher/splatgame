@@ -1,7 +1,7 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://dc5hkf84xdugs"]
 
-[ext_resource type="Script" path="res://addons/gdgs/runtime/nodes/gaussian_splat_node.gd" id="1_hlojd"]
-[ext_resource type="Resource" path="res://splats/cherrytree.ply" id="2_jnbbx"]
+[ext_resource type="Script" uid="uid://bonljuofac030" path="res://addons/gdgs/runtime/nodes/gaussian_splat_node.gd" id="1_hlojd"]
+[ext_resource type="Resource" uid="uid://8hhqkdqw535h" path="res://splats/cherrytree.splat" id="2_jnbbx"]
 [ext_resource type="Resource" path="res://splats/cherrytree_lighting.res" id="3_jnbbx"]
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_xgo4w"]
@@ -19,7 +19,7 @@ process_thread_group = 0
 physics_interpolation_mode = 0
 auto_translate_mode = 0
 editor_description = ""
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+transform = Transform3D(-1, -8.742278e-08, 0, 8.742278e-08, -1, 0, 0, 0, 1, 0, 0.5, 0)
 rotation_edit_mode = 0
 rotation_order = 2
 top_level = false
@@ -31,6 +31,7 @@ gaussian = ExtResource("2_jnbbx")
 lighting = ExtResource("3_jnbbx")
 
 [node name="TrunkCollision" type="StaticBody3D" parent="." unique_id=1075791286]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.047979638, 0, 0.024513423)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="TrunkCollision" unique_id=475312517]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35, 0)

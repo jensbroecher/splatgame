@@ -1,0 +1,15 @@
+[remap]
+
+importer="gaussian.splat.importer"
+importer_version=5
+type="Resource"
+uid="uid://p8avoe71lh6h"
+path="res://.godot/imported/stonearch.splat-622535d96176cc03c440537a591e0cf9.res"
+
+[deps]
+
+source_file="res://splats/stonearch.splat"
+dest_files=["res://.godot/imported/stonearch.splat-622535d96176cc03c440537a591e0cf9.res"]
+
+[params]
+
