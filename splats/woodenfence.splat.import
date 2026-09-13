@@ -1,0 +1,15 @@
+[remap]
+
+importer="gaussian.splat.importer"
+importer_version=5
+type="Resource"
+uid="uid://b03jhy0vjkctn"
+path="res://.godot/imported/woodenfence.splat-a4ba1ff261c1644327fb0ebf42491ae1.res"
+
+[deps]
+
+source_file="res://splats/woodenfence.splat"
+dest_files=["res://.godot/imported/woodenfence.splat-a4ba1ff261c1644327fb0ebf42491ae1.res"]
+
+[params]
+
