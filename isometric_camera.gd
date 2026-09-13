@@ -24,32 +24,44 @@ func _ready() -> void:
 	fov = camera_fov
 	near = 0.2
 	far = 160.0
+	# Run before splat sort / other _process readers so they see this frame's pose.
+	process_priority = -100
 	_configure_tilt_shift()
 	if target:
 		_snap_to_target()
 
-func _physics_process(delta: float) -> void:
+func _process(delta: float) -> void:
 	if not target:
 		return
-	var desired_pos := target.global_position + _calculate_offset()
-	global_position = global_position.lerp(desired_pos, follow_smooth_speed * delta)
-	look_at(_look_at_position(), Vector3.UP)
+	var origin := _target_origin()
+	var desired_pos := origin + _calculate_offset()
+	var t := 1.0 - exp(-follow_smooth_speed * delta)
+	global_position = global_position.lerp(desired_pos, t)
+	# Aim from the *desired* (unlagged) camera position, not the smoothed one.
+	# look_at() from a lagged camera rotated the view every frame during fast
+	# movement and retriggered splat depth-sort (flicker / wrong facing).
+	var look_dir := _look_at_position(origin) - desired_pos
+	if look_dir.length_squared() > 1e-12:
+		global_basis = Basis.looking_at(look_dir, Vector3.UP)
 	_update_tilt_shift_focus()
 
 func _snap_to_target() -> void:
 	if not target:
 		return
-	global_position = target.global_position + _calculate_offset()
-	look_at(_look_at_position(), Vector3.UP)
+	var origin := _target_origin()
+	global_position = origin + _calculate_offset()
+	look_at(_look_at_position(origin), Vector3.UP)
 	_update_tilt_shift_focus()
 
-func _look_at_position() -> Vector3:
-	var ahead := Vector3.ZERO
-	if look_ahead != 0.0:
-		var yaw := deg_to_rad(rotation_angle_deg)
-		# Camera looks toward -offset, i.e. into the scene along this ground dir.
-		ahead = Vector3(-sin(yaw), 0.0, -cos(yaw)) * look_ahead
-	return target.global_position + look_offset + ahead
+func _target_origin() -> Vector3:
+	if target.has_method("get_global_transform_interpolated"):
+		return target.get_global_transform_interpolated().origin
+	return target.global_position
+
+func _look_at_position(origin: Vector3) -> Vector3:
+	var yaw := deg_to_rad(rotation_angle_deg)
+	var ahead := Vector3(-sin(yaw), 0.0, -cos(yaw)) * look_ahead
+	return origin + look_offset + ahead
 
 func _calculate_offset() -> Vector3:
 	var pitch := deg_to_rad(elevation_angle_deg)

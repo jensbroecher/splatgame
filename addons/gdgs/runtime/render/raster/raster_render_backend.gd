@@ -11,9 +11,9 @@ extends "res://addons/gdgs/runtime/render/backend/gaussian_render_backend.gd"
 ##
 ## A single driver node at the scene root ticks every frame: it polls each node's
 ## background sort (WorkerThreadPool, double-buffered) and re-kicks it when the
-## camera direction relative to that node changes. Rendering always uses the last
-## completed order, so the sort may lag the camera a frame or two (mild popping)
-## without ever stalling the frame.
+## camera direction relative to that node changes. At most MAX_CONCURRENT_SORTS
+## jobs run at once, nearest first, so a busy scene does not stall every cloud
+## behind a thread-pool flood. Rendering always uses the last completed order.
 ##
 ## Fully self-contained under render/raster/: it never imports Compute code. Its
 ## only shared dependency is the read-only GaussianResource and the interface.
@@ -28,6 +28,11 @@ const SPLATS_PER_INSTANCE := 128
 const DRIVER_NODE_NAME := "_GdgsRasterDriver"
 # Re-sort when the local view direction rotates past ~1 degree (cos threshold).
 const RESORT_DOT_THRESHOLD := 0.99985
+# Cap in-flight WorkerThreadPool sorts. A scene with dozens of splat nodes
+# otherwise queues every cloud at once; each job then waits behind the others
+# and the visible order lags the camera by many frames (flicker / wrong facing
+# until the camera stops). Nearest nodes are kicked first.
+const MAX_CONCURRENT_SORTS := 4
 # Guarded load, not preload: runtime/lighting/ is deletable and losing it must
 # only cost relighting, leaving splats rendering unlit.
 const LIGHT_RIG_PATH := "res://addons/gdgs/runtime/lighting/gaussian_light_rig.gd"
@@ -118,9 +123,31 @@ func drive_sorts() -> void:
 	var rig_changed := false
 	if rig != null:
 		rig_changed = rig.update(_any_attached_node())
+
+	var running := 0
+	var pending: Array = []
 	for entry in _entries.values():
-		_drive_entry(entry)
 		_drive_lighting(entry, rig, rig_changed)
+		var request: Variant = _poll_and_collect_sort(entry)
+		if request == null:
+			if entry.job != null and entry.job.is_running():
+				running += 1
+			continue
+		pending.append(request)
+
+	if pending.is_empty():
+		return
+	pending.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return float(a["dist2"]) < float(b["dist2"])
+	)
+	for request in pending:
+		if running >= MAX_CONCURRENT_SORTS:
+			break
+		var entry: Entry = request["entry"]
+		if entry.job.kick(request["dir_local"]):
+			entry.last_dir_local = request["dir_n"]
+			entry.has_kicked = true
+			running += 1
 
 ## Relighting state is pulled from the node every frame rather than pushed
 ## through a new backend-interface event: the knobs are a handful of Variant
@@ -211,35 +238,47 @@ func _any_attached_node() -> Node:
 			return entry.mmi
 	return null
 
-func _drive_entry(entry: Entry) -> void:
+## Poll a finished sort. If this entry needs a new sort, return a request dict
+## so drive_sorts can kick nearest-first under MAX_CONCURRENT_SORTS. Returns
+## null when the entry is idle, still running, or does not need a re-sort.
+func _poll_and_collect_sort(entry: Entry) -> Variant:
 	if entry.job == null or entry.mmi == null or not is_instance_valid(entry.mmi):
-		return
+		return null
 
-	# Collect a finished sort and push it to the GPU.
 	if entry.job.poll():
 		_upload_order(entry)
 
+	if entry.job.is_running():
+		return null
+
 	var node := entry.mmi.get_parent()
 	if node == null or not (node is Node3D):
-		return
+		return null
 	var camera := _find_camera(node)
 	if camera == null:
-		return
+		return null
 
-	# View forward expressed in the splat's local space (positions are local).
-	var world_forward := -camera.global_transform.basis.z
-	var node_basis := (node as Node3D).global_transform.basis
-	var dir_local := node_basis.transposed() * world_forward
+	# Render-camera forward (interpolated when physics interpolation is on),
+	# expressed in the splat's local space. inverse() not transpose(): nodes
+	# often carry non-uniform scale (grass clumps, placed trees) and transpose
+	# then sorts along the wrong axis.
+	var cam_xform := camera.get_camera_transform()
+	var world_forward := -cam_xform.basis.z
+	var dir_local: Vector3 = (node as Node3D).global_transform.basis.inverse() * world_forward
 	if dir_local.length() < 1e-8:
-		return
+		return null
 	var dir_n := dir_local.normalized()
 
-	# Camera-static skip: only re-sort when the direction moved past threshold.
 	var moved := (not entry.has_kicked) or (entry.last_dir_local.dot(dir_n) < RESORT_DOT_THRESHOLD)
-	if moved and not entry.job.is_running():
-		if entry.job.kick(dir_local):
-			entry.last_dir_local = dir_n
-			entry.has_kicked = true
+	if not moved:
+		return null
+
+	return {
+		"entry": entry,
+		"dir_local": dir_local,
+		"dir_n": dir_n,
+		"dist2": cam_xform.origin.distance_squared_to((node as Node3D).global_position),
+	}
 
 ## The worker already packed the R32F texel bytes, so a completed sort costs the
 ## main thread one Image.set_data plus the texture update — no per-splat work.

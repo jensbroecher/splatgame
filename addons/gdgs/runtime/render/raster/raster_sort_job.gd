@@ -43,7 +43,7 @@ func kick(view_dir_local: Vector3) -> bool:
 	if _task_id != -1:
 		return false
 	_pending_dir = view_dir_local
-	_task_id = WorkerThreadPool.add_task(Callable(self, "_run"), false, "gdgs raster sort")
+	_task_id = WorkerThreadPool.add_task(Callable(self, "_run"), true, "gdgs raster sort")
 	return true
 
 func _run() -> void:

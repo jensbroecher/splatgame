@@ -10,6 +10,11 @@ extends Node
 
 var backend: RefCounted = null
 
+func _ready() -> void:
+	# After cameras (typically process_priority 0 or negative) so this tick
+	# sees the same transform the GPU will render this frame.
+	process_priority = 100
+
 func _process(_delta: float) -> void:
 	if backend != null and backend.has_method("drive_sorts"):
 		backend.drive_sorts()
