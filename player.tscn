@@ -1,8 +1,8 @@
 [gd_scene format=3 uid="uid://4x584ov42oi1"]
 
 [ext_resource type="Script" uid="uid://ccb11shhw4j1d" path="res://player.gd" id="1_4flbx"]
-[ext_resource type="Script" uid="uid://bonljuofac030" path="res://addons/gdgs/runtime/nodes/gaussian_splat_node.gd" id="2_i3pqv"]
-[ext_resource type="Resource" uid="uid://sgmkm8phx1tg" path="res://characters/character.splat" id="3_hqtel"]
+[ext_resource type="PackedScene" uid="uid://gldjjsp6a50o" path="res://characters/accurig.fbx" id="2_onrkg"]
+[ext_resource type="AnimationLibrary" path="res://characters/animations/walk_library.tres" id="3_walkanim"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_onrkg"]
 radius = 0.35
@@ -17,22 +17,10 @@ shape = SubResource("CapsuleShape3D_onrkg")
 
 [node name="Visual" type="Node3D" parent="." unique_id=319269873]
 
-[node name="GaussianSplatNode" type="VisualInstance3D" parent="Visual" unique_id=1556373918]
-unique_name_in_owner = false
-process_mode = 0
-process_priority = 0
-process_physics_priority = 0
-process_thread_group = 0
-physics_interpolation_mode = 0
-auto_translate_mode = 0
-editor_description = ""
-transform = Transform3D(1.3113416e-07, -1.1464113e-14, -3, -2.6226832e-07, -3, 0, -3, 2.6226832e-07, -1.3113416e-07, 0, 2.0734007, 0)
-rotation_edit_mode = 0
-rotation_order = 2
-top_level = false
-visible = true
-visibility_parent = NodePath("")
-layers = 1
-script = ExtResource("2_i3pqv")
-gaussian = ExtResource("3_hqtel")
-metadata/_custom_type_script = "uid://bonljuofac030"
+[node name="accurig" parent="Visual" unique_id=2118381452 instance=ExtResource("2_onrkg")]
+transform = Transform3D(-200, 0, 1.7484555e-05, 0, 200, 0, -1.7484555e-05, 0, -200, 0, 0, 0)
+
+[node name="WalkAnimPlayer" type="AnimationPlayer" parent="." unique_id=3141592653]
+libraries = {
+"": ExtResource("3_walkanim")
+}
