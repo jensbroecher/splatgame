@@ -1,7 +1,8 @@
 [gd_scene format=3 uid="uid://4x584ov42oi1"]
 
 [ext_resource type="Script" uid="uid://ccb11shhw4j1d" path="res://player.gd" id="1_4flbx"]
-[ext_resource type="Texture2D" uid="uid://b34nwwyh0rnxx" path="res://characters/cc030b47f15fa6530ae43cbd1484024c.jpg" id="2_onrkg"]
+[ext_resource type="Script" uid="uid://bonljuofac030" path="res://addons/gdgs/runtime/nodes/gaussian_splat_node.gd" id="2_i3pqv"]
+[ext_resource type="Resource" uid="uid://sgmkm8phx1tg" path="res://characters/character.splat" id="3_hqtel"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_onrkg"]
 radius = 0.35
@@ -16,6 +17,22 @@ shape = SubResource("CapsuleShape3D_onrkg")
 
 [node name="Visual" type="Node3D" parent="." unique_id=319269873]
 
-[node name="Sprite3D" type="Sprite3D" parent="Visual" unique_id=1367881460]
-transform = Transform3D(0.3, 0, 0, 0, 0.3, 0, 0, 0, 0.3, 0, 1.1029277, 0)
-texture = ExtResource("2_onrkg")
+[node name="GaussianSplatNode" type="VisualInstance3D" parent="Visual" unique_id=1556373918]
+unique_name_in_owner = false
+process_mode = 0
+process_priority = 0
+process_physics_priority = 0
+process_thread_group = 0
+physics_interpolation_mode = 0
+auto_translate_mode = 0
+editor_description = ""
+transform = Transform3D(1.3113416e-07, -1.1464113e-14, -3, -2.6226832e-07, -3, 0, -3, 2.6226832e-07, -1.3113416e-07, 0, 2.0734007, 0)
+rotation_edit_mode = 0
+rotation_order = 2
+top_level = false
+visible = true
+visibility_parent = NodePath("")
+layers = 1
+script = ExtResource("2_i3pqv")
+gaussian = ExtResource("3_hqtel")
+metadata/_custom_type_script = "uid://bonljuofac030"

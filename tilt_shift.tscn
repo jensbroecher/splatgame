@@ -1,0 +1,23 @@
+[gd_scene format=3 uid="uid://bd5icffe15wg2"]
+
+[ext_resource type="Shader" uid="uid://dtm1jq7k8rfut" path="res://tilt_shift.gdshader" id="1_5p2xy"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_tilt"]
+shader = ExtResource("1_5p2xy")
+shader_parameter/blur_px = 5.5
+shader_parameter/focus_y = 0.58
+shader_parameter/focus_width = 0.14
+shader_parameter/focus_falloff = 0.26
+shader_parameter/top_heaviness = 1.35
+
+[node name="TiltShift" type="CanvasLayer" unique_id=852934984]
+layer = 10
+
+[node name="Blur" type="ColorRect" parent="." unique_id=1621444914]
+material = SubResource("ShaderMaterial_tilt")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
