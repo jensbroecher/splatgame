@@ -1,4 +1,4 @@
-[gd_resource type="AnimationLibrary" format=3]
+[gd_resource type="AnimationLibrary" format=3 uid="uid://cjaqe0d2niyfr"]
 
 [sub_resource type="Animation" id="Animation_0h2bq"]
 length = 0.001
@@ -82,6 +82,7 @@ tracks/10/loop_wrap = true
 tracks/10/keys = PackedFloat32Array(0, 1, 0, 1, 0, 0)
 
 [sub_resource type="Animation" id="Animation_d3nrt"]
+length = 1.0
 loop_mode = 1
 tracks/0/type = "position_3d"
 tracks/0/imported = false

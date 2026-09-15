@@ -1,0 +1,36 @@
+~ start
+
+Mysterious Box: [[Hello there!|Greetings, traveler!|Oh, a visitor!]]
+Mysterious Box: I am the Mysterious Box of this diorama.
+Mysterious Box: I was created to test Nathan Hoad's Dialogue Manager!
+- Who placed you here?
+	Mysterious Box: A curious developer who wanted to see if we could converse.
+	Mysterious Box: And look at us now! It works wonderfully.
+	=> questions
+- Tell me a secret about this garden.
+	Mysterious Box: Lean in close...
+	Mysterious Box: The foliage and trees around us are rendered with 3D Gaussian Splats!
+	Mysterious Box: Pretty cool technology, isn't it?
+	=> questions
+- Can you change your color?
+	Mysterious Box: Watch this!
+	do change_color()
+	Mysterious Box: Ta-da! How do you like this new look?
+	=> questions
+- Goodbye.
+	Mysterious Box: Farewell! Feel free to talk to me anytime.
+	=> END
+
+~ questions
+Mysterious Box: Is there anything else you'd like to ask?
+- Tell me a joke!
+	Mysterious Box: Why did the computer squeak?
+	Mysterious Box: Because someone stepped on its mouse! Haha!
+	=> questions
+- Change your color again!
+	do change_color()
+	Mysterious Box: Presto chango! Another fresh coat of paint.
+	=> questions
+- That's all for now.
+	Mysterious Box: Have a wonderful stroll through the garden!
+	=> END

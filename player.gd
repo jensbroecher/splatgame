@@ -13,32 +13,65 @@ extends CharacterBody3D
 @onready var anim_player: AnimationPlayer = $WalkAnimPlayer
 
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity", 9.8)
+var is_in_dialogue: bool = false
+var _model_forward_sign: float = 1.0
 
 func _ready() -> void:
+	add_to_group("player")
 	_harden_materials(visual_node)
 	# Route the AnimationPlayer to the skeleton inside the FBX sub-scene
 	anim_player.root_node = anim_player.get_path_to(visual_node.get_parent())
+
+	# Enforce clean walk animation loop runtime settings
+	var walk_anim := anim_player.get_animation("walk")
+	if walk_anim:
+		walk_anim.length = 1.0
+		walk_anim.loop_mode = Animation.LOOP_LINEAR
+
 	anim_player.play("idle")
+
+	# Dynamically detect child model's local forward orientation (+Z vs -Z)
+	var child_visual: Node3D = null
+	for child in visual_node.get_children():
+		if child is Node3D:
+			child_visual = child
+			break
+	if child_visual:
+		# If child basis Z has negative Z component, model was rotated 180° in scene to face -Z.
+		# If positive, model naturally faces +Z.
+		_model_forward_sign = -1.0 if child_visual.transform.basis.z.z < 0.0 else 1.0
+
+	if Engine.has_singleton("DialogueManager"):
+		var dm: Node = Engine.get_singleton("DialogueManager")
+		dm.dialogue_started.connect(func(_resource): is_in_dialogue = true)
+		dm.dialogue_ended.connect(func(_resource): is_in_dialogue = false)
+	elif has_node("/root/DialogueManager"):
+		var dm: Node = get_node("/root/DialogueManager")
+		dm.dialogue_started.connect(func(_resource): is_in_dialogue = true)
+		dm.dialogue_ended.connect(func(_resource): is_in_dialogue = false)
 
 
 func _physics_process(delta: float) -> void:
 	if not is_on_floor():
 		velocity.y -= gravity * delta
 
-	var jump_pressed := Input.is_key_pressed(KEY_SPACE) or Input.is_action_just_pressed("ui_accept")
+	var jump_pressed := false
+	if not is_in_dialogue:
+		jump_pressed = Input.is_key_pressed(KEY_SPACE) or Input.is_action_just_pressed("ui_accept")
 	if is_on_floor() and jump_pressed:
 		velocity.y = jump_velocity
 
 	var input_x: float = 0.0
 	var input_z: float = 0.0
-	if Input.is_key_pressed(KEY_D) or Input.is_key_pressed(KEY_RIGHT) or Input.is_action_pressed("ui_right"):
-		input_x += 1.0
-	if Input.is_key_pressed(KEY_A) or Input.is_key_pressed(KEY_LEFT) or Input.is_action_pressed("ui_left"):
-		input_x -= 1.0
-	if Input.is_key_pressed(KEY_S) or Input.is_key_pressed(KEY_DOWN) or Input.is_action_pressed("ui_down"):
-		input_z += 1.0
-	if Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_UP) or Input.is_action_pressed("ui_up"):
-		input_z -= 1.0
+	if not is_in_dialogue:
+		if Input.is_key_pressed(KEY_D) or Input.is_key_pressed(KEY_RIGHT) or Input.is_action_pressed("ui_right"):
+			input_x += 1.0
+		if Input.is_key_pressed(KEY_A) or Input.is_key_pressed(KEY_LEFT) or Input.is_action_pressed("ui_left"):
+			input_x -= 1.0
+		if Input.is_key_pressed(KEY_S) or Input.is_key_pressed(KEY_DOWN) or Input.is_action_pressed("ui_down"):
+			input_z += 1.0
+		if Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_UP) or Input.is_action_pressed("ui_up"):
+			input_z -= 1.0
 
 	var input_dir := Vector2(input_x, input_z).normalized()
 
@@ -60,7 +93,7 @@ func _physics_process(delta: float) -> void:
 		velocity.x = move_toward(velocity.x, target_vel.x, acceleration * delta)
 		velocity.z = move_toward(velocity.z, target_vel.z, acceleration * delta)
 		if visual_node:
-			var target_angle := atan2(-move_dir.x, -move_dir.z)
+			var target_angle := atan2(_model_forward_sign * move_dir.x, _model_forward_sign * move_dir.z)
 			visual_node.rotation.y = lerp_angle(visual_node.rotation.y, target_angle, rotation_speed * delta)
 	else:
 		velocity.x = move_toward(velocity.x, 0.0, friction * delta)
