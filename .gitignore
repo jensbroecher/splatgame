@@ -4,5 +4,9 @@
 .nomedia
 .DS_Store
 
+# Godot-specific ignores
+*.import
+.import/
+
 # Addons (managed separately / not committed)
 /addons/
