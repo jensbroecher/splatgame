@@ -35,6 +35,10 @@ const TEX_PATHS := [
 	"res://tiles/textures/cobble.jpg",
 ]
 const SHADER_PATH := "res://tiles/ground_blend.gdshader"
+const CLIFF_SHADER_PATH := "res://tiles/cliff_rock.gdshader"
+const ROCK_TEX_PATH := "res://tiles/textures/rock_cliff.jpg"
+const ROCK_NORM_PATH := "res://tiles/textures/rock_cliff_normal.png"
+const ROCK_ROUGH_PATH := "res://tiles/textures/rock_cliff_roughness.png"
 const CELL := 2.0
 const EMPTY_ID := 255
 
@@ -46,6 +50,18 @@ const EMPTY_ID := 255
 @export_range(0.02, 0.45, 0.01) var blend_width: float = 0.1:
 	set(value):
 		blend_width = value
+		_apply_material_params()
+
+@export_range(0.05, 0.45, 0.01) var bevel_radius: float = 0.22:
+	set(value):
+		bevel_radius = value
+		_apply_material_params()
+		if not get_used_cells().is_empty():
+			_rebuild_cliffs(_surface_cells(get_used_cells()))
+
+@export var cliff_uv_scale: float = 0.5:
+	set(value):
+		cliff_uv_scale = value
 		_apply_material_params()
 
 @export var fill_default_layout: bool = false:
@@ -66,7 +82,7 @@ const EMPTY_ID := 255
 var _material: ShaderMaterial
 var _id_tex: ImageTexture
 var _last_hash := 0
-var _cliff_material: StandardMaterial3D
+var _cliff_material: Material
 var _layer_items: Dictionary = {}
 var _height_hud: Control
 var _height_label: Label
@@ -168,7 +184,7 @@ func _ensure_height_hud() -> void:
 	var editor := Engine.get_singleton("EditorInterface")
 	if editor == null or not editor.has_method("get_editor_viewport_3d"):
 		return
-	var viewport: Control = editor.call("get_editor_viewport_3d", 0)
+	var viewport: Node = editor.call("get_editor_viewport_3d", 0)
 	if viewport == null:
 		return
 	_height_hud = HBoxContainer.new()
@@ -213,17 +229,26 @@ func _flatten_orientations() -> void:
 			set_cell_item(cell, get_cell_item(cell), 0)
 
 func _ensure_library() -> void:
+	var needs_rebuild := false
 	if (
-		mesh_library != null
-		and _material != null
-		and mesh_library.get_item_list().size() == NAMES.size()
+		mesh_library == null
+		or _material == null
+		or mesh_library.get_item_list().size() != NAMES.size()
 	):
+		needs_rebuild = true
+	else:
+		var m := mesh_library.get_item_mesh(0) as PlaneMesh
+		if m == null or m.subdivide_width < 16:
+			needs_rebuild = true
+	if not needs_rebuild:
 		return
 	_material = _make_material()
 	var lib := MeshLibrary.new()
 	for i in NAMES.size():
 		var mesh := PlaneMesh.new()
 		mesh.size = Vector2(CELL, CELL)
+		mesh.subdivide_width = 20
+		mesh.subdivide_depth = 20
 		mesh.material = _material
 		lib.create_item(i)
 		lib.set_item_mesh(i, mesh)
@@ -246,13 +271,16 @@ func _make_material() -> ShaderMaterial:
 	mat.set_shader_parameter("elevation_step", cell_size.y)
 	mat.set_shader_parameter("uv_scale", 1.0 / texture_world_size)
 	mat.set_shader_parameter("blend_width", blend_width)
+	mat.set_shader_parameter("bevel_radius", bevel_radius)
 	return mat
 
 func _apply_material_params() -> void:
-	if _material == null:
-		return
-	_material.set_shader_parameter("uv_scale", 1.0 / texture_world_size)
-	_material.set_shader_parameter("blend_width", blend_width)
+	if _material != null:
+		_material.set_shader_parameter("uv_scale", 1.0 / texture_world_size)
+		_material.set_shader_parameter("blend_width", blend_width)
+		_material.set_shader_parameter("bevel_radius", bevel_radius)
+	if _cliff_material != null and _cliff_material is ShaderMaterial:
+		(_cliff_material as ShaderMaterial).set_shader_parameter("uv_scale", cliff_uv_scale)
 
 const PREVIEW_GRASS := Color(0.40, 0.62, 0.32)
 const PREVIEW_FOREST := Color(0.38, 0.24, 0.13)
@@ -416,72 +444,220 @@ func _rebuild_cliffs(top: Dictionary) -> void:
 		return
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	st.set_smooth_group(-1)
-	var dirs: Array[Vector2i] = [
-		Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)
-	]
+
+	var hx := CELL * 0.5
+	var hz := CELL * 0.5
+
 	for key in top.keys():
 		var xz: Vector2i = key
 		var cell: Vector3i = top[xz]
 		var origin := map_to_local(cell)
 		var top_y := origin.y
-		for d in dirs:
-			var nkey: Vector2i = xz + d
-			var n_top := collision_base
-			if top.has(nkey):
-				n_top = map_to_local(top[nkey]).y
-			if top_y - n_top < 0.05:
-				continue
-			_add_cliff_quad(st, origin, d, n_top, top_y)
-	st.generate_normals()
+
+		var n_east: float = map_to_local(top[xz + Vector2i(1, 0)]).y if top.has(xz + Vector2i(1, 0)) else collision_base
+		var n_west: float = map_to_local(top[xz + Vector2i(-1, 0)]).y if top.has(xz + Vector2i(-1, 0)) else collision_base
+		var n_north: float = map_to_local(top[xz + Vector2i(0, -1)]).y if top.has(xz + Vector2i(0, -1)) else collision_base
+		var n_south: float = map_to_local(top[xz + Vector2i(0, 1)]).y if top.has(xz + Vector2i(0, 1)) else collision_base
+
+		var is_cliff_e := (top_y - n_east >= 0.05)
+		var is_cliff_w := (top_y - n_west >= 0.05)
+		var is_cliff_n := (top_y - n_north >= 0.05)
+		var is_cliff_s := (top_y - n_south >= 0.05)
+
+		var r_eff_e := minf(bevel_radius, (top_y - n_east) * 0.7) if is_cliff_e else 0.0
+		var r_eff_w := minf(bevel_radius, (top_y - n_west) * 0.7) if is_cliff_w else 0.0
+		var r_eff_n := minf(bevel_radius, (top_y - n_north) * 0.7) if is_cliff_n else 0.0
+		var r_eff_s := minf(bevel_radius, (top_y - n_south) * 0.7) if is_cliff_s else 0.0
+
+		# Straight cliff walls
+		if is_cliff_e:
+			var z_start := (origin.z - hz + bevel_radius) if is_cliff_n else (origin.z - hz)
+			var z_end := (origin.z + hz - bevel_radius) if is_cliff_s else (origin.z + hz)
+			if z_end > z_start:
+				_add_cliff_wall_quad(st, Vector2(origin.x + hx, z_start), Vector2(origin.x + hx, z_end), n_east, top_y - r_eff_e, Vector3(1.0, 0.0, 0.0))
+
+		if is_cliff_w:
+			var z_start := (origin.z - hz + bevel_radius) if is_cliff_n else (origin.z - hz)
+			var z_end := (origin.z + hz - bevel_radius) if is_cliff_s else (origin.z + hz)
+			if z_end > z_start:
+				_add_cliff_wall_quad(st, Vector2(origin.x - hx, z_end), Vector2(origin.x - hx, z_start), n_west, top_y - r_eff_w, Vector3(-1.0, 0.0, 0.0))
+
+		if is_cliff_s:
+			var x_start := (origin.x - hx + bevel_radius) if is_cliff_w else (origin.x - hx)
+			var x_end := (origin.x + hx - bevel_radius) if is_cliff_e else (origin.x + hx)
+			if x_end > x_start:
+				_add_cliff_wall_quad(st, Vector2(x_end, origin.z + hz), Vector2(x_start, origin.z + hz), n_south, top_y - r_eff_s, Vector3(0.0, 0.0, 1.0))
+
+		if is_cliff_n:
+			var x_start := (origin.x - hx + bevel_radius) if is_cliff_w else (origin.x - hx)
+			var x_end := (origin.x + hx - bevel_radius) if is_cliff_e else (origin.x + hx)
+			if x_end > x_start:
+				_add_cliff_wall_quad(st, Vector2(x_start, origin.z - hz), Vector2(x_end, origin.z - hz), n_north, top_y - r_eff_n, Vector3(0.0, 0.0, -1.0))
+
+		# Convex corner arcs
+		if is_cliff_e and is_cliff_s:
+			var center := Vector3(origin.x + hx - bevel_radius, 0.0, origin.z + hz - bevel_radius)
+			var n_se: float = map_to_local(top[xz + Vector2i(1, 1)]).y if top.has(xz + Vector2i(1, 1)) else collision_base
+			var bot_y := minf(n_east, minf(n_south, n_se))
+			var top_y_corner := top_y - minf(r_eff_e, r_eff_s)
+			_add_cliff_corner_arc(st, center, bevel_radius, 0.0, PI * 0.5, bot_y, top_y_corner, 4)
+
+		if is_cliff_e and is_cliff_n:
+			var center := Vector3(origin.x + hx - bevel_radius, 0.0, origin.z - hz + bevel_radius)
+			var n_ne: float = map_to_local(top[xz + Vector2i(1, -1)]).y if top.has(xz + Vector2i(1, -1)) else collision_base
+			var bot_y := minf(n_east, minf(n_north, n_ne))
+			var top_y_corner := top_y - minf(r_eff_e, r_eff_n)
+			_add_cliff_corner_arc(st, center, bevel_radius, -PI * 0.5, 0.0, bot_y, top_y_corner, 4)
+
+		if is_cliff_w and is_cliff_s:
+			var center := Vector3(origin.x - hx + bevel_radius, 0.0, origin.z + hz - bevel_radius)
+			var n_sw: float = map_to_local(top[xz + Vector2i(-1, 1)]).y if top.has(xz + Vector2i(-1, 1)) else collision_base
+			var bot_y := minf(n_west, minf(n_south, n_sw))
+			var top_y_corner := top_y - minf(r_eff_w, r_eff_s)
+			_add_cliff_corner_arc(st, center, bevel_radius, PI * 0.5, PI, bot_y, top_y_corner, 4)
+
+		if is_cliff_w and is_cliff_n:
+			var center := Vector3(origin.x - hx + bevel_radius, 0.0, origin.z - hz + bevel_radius)
+			var n_nw: float = map_to_local(top[xz + Vector2i(-1, -1)]).y if top.has(xz + Vector2i(-1, -1)) else collision_base
+			var bot_y := minf(n_west, minf(n_north, n_nw))
+			var top_y_corner := top_y - minf(r_eff_w, r_eff_n)
+			_add_cliff_corner_arc(st, center, bevel_radius, PI, PI * 1.5, bot_y, top_y_corner, 4)
+
 	mesh_inst.mesh = st.commit()
 	mesh_inst.material_override = _cliff_mat()
 
-func _add_cliff_quad(st: SurfaceTool, origin: Vector3, dir: Vector2i, y0: float, y1: float) -> void:
-	var hx := CELL * 0.5
-	var hz := CELL * 0.5
-	var a := Vector3.ZERO
-	var b := Vector3.ZERO
-	if dir.x == 1:
-		a = Vector3(origin.x + hx, y0, origin.z - hz)
-		b = Vector3(origin.x + hx, y0, origin.z + hz)
-	elif dir.x == -1:
-		a = Vector3(origin.x - hx, y0, origin.z + hz)
-		b = Vector3(origin.x - hx, y0, origin.z - hz)
-	elif dir.y == 1:
-		a = Vector3(origin.x + hx, y0, origin.z + hz)
-		b = Vector3(origin.x - hx, y0, origin.z + hz)
-	else:
-		a = Vector3(origin.x - hx, y0, origin.z - hz)
-		b = Vector3(origin.x + hx, y0, origin.z - hz)
-	var c := Vector3(b.x, y1, b.z)
-	var d := Vector3(a.x, y1, a.z)
-	var uv_scale := 1.0 / texture_world_size
-	var uvs := PackedVector2Array([
-		Vector2(a.x, a.y) * uv_scale,
-		Vector2(b.x, b.y) * uv_scale,
-		Vector2(c.x, c.y) * uv_scale,
-		Vector2(d.x, d.y) * uv_scale,
-	])
-	st.set_uv(uvs[0])
+func _add_cliff_wall_quad(
+	st: SurfaceTool,
+	p0: Vector2,
+	p1: Vector2,
+	y0: float,
+	y1: float,
+	normal: Vector3
+) -> void:
+	if y1 - y0 < 0.02:
+		return
+	var a := Vector3(p0.x, y0, p0.y)
+	var b := Vector3(p1.x, y0, p1.y)
+	var c := Vector3(p1.x, y1, p1.y)
+	var d := Vector3(p0.x, y1, p0.y)
+
+	var uv_scale := cliff_uv_scale
+	var u_a := a.x + a.z
+	var u_b := b.x + b.z
+
+	# Triangle 1: a -> b -> c
+	st.set_normal(normal)
+	st.set_uv(Vector2(u_a, -a.y) * uv_scale)
+	st.set_uv2(Vector2(y1 - a.y, 0.0))
 	st.add_vertex(a)
-	st.set_uv(uvs[1])
+
+	st.set_normal(normal)
+	st.set_uv(Vector2(u_b, -b.y) * uv_scale)
+	st.set_uv2(Vector2(y1 - b.y, 0.0))
 	st.add_vertex(b)
-	st.set_uv(uvs[2])
+
+	st.set_normal(normal)
+	st.set_uv(Vector2(u_b, -c.y) * uv_scale)
+	st.set_uv2(Vector2(y1 - c.y, 0.0))
 	st.add_vertex(c)
-	st.set_uv(uvs[0])
+
+	# Triangle 2: a -> c -> d
+	st.set_normal(normal)
+	st.set_uv(Vector2(u_a, -a.y) * uv_scale)
+	st.set_uv2(Vector2(y1 - a.y, 0.0))
 	st.add_vertex(a)
-	st.set_uv(uvs[2])
+
+	st.set_normal(normal)
+	st.set_uv(Vector2(u_b, -c.y) * uv_scale)
+	st.set_uv2(Vector2(y1 - c.y, 0.0))
 	st.add_vertex(c)
-	st.set_uv(uvs[3])
+
+	st.set_normal(normal)
+	st.set_uv(Vector2(u_a, -d.y) * uv_scale)
+	st.set_uv2(Vector2(y1 - d.y, 0.0))
 	st.add_vertex(d)
 
-func _cliff_mat() -> StandardMaterial3D:
-	if _cliff_material == null:
-		_cliff_material = StandardMaterial3D.new()
-		_cliff_material.albedo_texture = _load_tex(TEX_PATHS[1])
-		_cliff_material.roughness = 0.95
-	return _cliff_material
+func _add_cliff_corner_arc(
+	st: SurfaceTool,
+	center: Vector3,
+	radius: float,
+	start_angle: float,
+	end_angle: float,
+	y0: float,
+	y1: float,
+	segments: int = 4
+) -> void:
+	if y1 - y0 < 0.02:
+		return
+	var da := (end_angle - start_angle) / float(segments)
+	var uv_scale := cliff_uv_scale
+	for i in segments:
+		var a0 := start_angle + float(i) * da
+		var a1 := start_angle + float(i + 1) * da
+
+		var cos0 := cos(a0)
+		var sin0 := sin(a0)
+		var cos1 := cos(a1)
+		var sin1 := sin(a1)
+
+		var p0_bot := Vector3(center.x + radius * cos0, y0, center.z + radius * sin0)
+		var p1_bot := Vector3(center.x + radius * cos1, y0, center.z + radius * sin1)
+		var p1_top := Vector3(center.x + radius * cos1, y1, center.z + radius * sin1)
+		var p0_top := Vector3(center.x + radius * cos0, y1, center.z + radius * sin0)
+
+		var n0 := Vector3(cos0, 0.0, sin0)
+		var n1 := Vector3(cos1, 0.0, sin1)
+
+		var u0 := p0_bot.x + p0_bot.z
+		var u1 := p1_bot.x + p1_bot.z
+
+		# Triangle 1: p0_bot -> p1_bot -> p1_top
+		st.set_normal(n0)
+		st.set_uv(Vector2(u0, -p0_bot.y) * uv_scale)
+		st.set_uv2(Vector2(y1 - p0_bot.y, 0.0))
+		st.add_vertex(p0_bot)
+
+		st.set_normal(n1)
+		st.set_uv(Vector2(u1, -p1_bot.y) * uv_scale)
+		st.set_uv2(Vector2(y1 - p1_bot.y, 0.0))
+		st.add_vertex(p1_bot)
+
+		st.set_normal(n1)
+		st.set_uv(Vector2(u1, -p1_top.y) * uv_scale)
+		st.set_uv2(Vector2(y1 - p1_top.y, 0.0))
+		st.add_vertex(p1_top)
+
+		# Triangle 2: p0_bot -> p1_top -> p0_top
+		st.set_normal(n0)
+		st.set_uv(Vector2(u0, -p0_bot.y) * uv_scale)
+		st.set_uv2(Vector2(y1 - p0_bot.y, 0.0))
+		st.add_vertex(p0_bot)
+
+		st.set_normal(n1)
+		st.set_uv(Vector2(u1, -p1_top.y) * uv_scale)
+		st.set_uv2(Vector2(y1 - p1_top.y, 0.0))
+		st.add_vertex(p1_top)
+
+		st.set_normal(n0)
+		st.set_uv(Vector2(u0, -p0_top.y) * uv_scale)
+		st.set_uv2(Vector2(y1 - p0_top.y, 0.0))
+		st.add_vertex(p0_top)
+
+func _cliff_mat() -> ShaderMaterial:
+	if _cliff_material == null or not (_cliff_material is ShaderMaterial):
+		var mat := ShaderMaterial.new()
+		mat.shader = load(CLIFF_SHADER_PATH)
+		mat.set_shader_parameter("tex_rock_albedo", _load_tex(ROCK_TEX_PATH))
+		mat.set_shader_parameter("tex_rock_normal", _load_tex(ROCK_NORM_PATH))
+		mat.set_shader_parameter("tex_rock_roughness", _load_tex(ROCK_ROUGH_PATH))
+		mat.set_shader_parameter("tex_grass", _load_tex(TEX_PATHS[0]))
+		mat.set_shader_parameter("uv_scale", cliff_uv_scale)
+		mat.set_shader_parameter("normal_depth", 1.3)
+		mat.set_shader_parameter("roughness_scale", 1.0)
+		mat.set_shader_parameter("top_blend_height", 0.25)
+		mat.set_shader_parameter("top_blend_strength", 0.45)
+		_cliff_material = mat
+	return _cliff_material as ShaderMaterial
 
 func _cells_hash() -> int:
 	var h := 0

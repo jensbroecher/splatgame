@@ -91,8 +91,52 @@ vec4 cell_sample(int id, vec2 uv, vec2 local) {
 	return r;
 }
 
+uniform float bevel_radius = 0.22;
+
 void vertex() {
-	v_world = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	vec3 world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	vec3 cell_center_world = (MODEL_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
+	vec2 p_center = (cell_center_world.xz - map_origin) / max(cell_size, 0.001);
+	ivec2 self_c = ivec2(round(p_center - vec2(0.5)));
+	ivec2 self = fetch_cell(self_c);
+
+	if (self.x != 255) {
+		float b = clamp(bevel_radius / max(cell_size, 0.001), 0.01, 0.45);
+		vec2 u = clamp(VERTEX.xz / max(cell_size, 0.001) + vec2(0.5), vec2(0.0), vec2(1.0));
+
+		int hy_w = fetch_cell(self_c + ivec2(-1, 0)).y;
+		int hy_e = fetch_cell(self_c + ivec2(1, 0)).y;
+		int hy_n = fetch_cell(self_c + ivec2(0, -1)).y;
+		int hy_s = fetch_cell(self_c + ivec2(0, 1)).y;
+
+		bool cliff_w = (hy_w == -999 || hy_w < self.y);
+		bool cliff_e = (hy_e == -999 || hy_e < self.y);
+		bool cliff_n = (hy_n == -999 || hy_n < self.y);
+		bool cliff_s = (hy_s == -999 || hy_s < self.y);
+
+		float x_min = cliff_w ? b : 0.0;
+		float x_max = cliff_e ? (1.0 - b) : 1.0;
+		float z_min = cliff_n ? b : 0.0;
+		float z_max = cliff_s ? (1.0 - b) : 1.0;
+
+		vec2 q = vec2(clamp(u.x, x_min, x_max), clamp(u.y, z_min, z_max));
+		vec2 delta = u - q;
+		float dist = length(delta);
+
+		if (dist > 0.0001) {
+			vec2 dir = delta / dist;
+			float t = clamp(dist / b, 0.0, 1.0);
+			float y_drop = bevel_radius * (1.0 - sqrt(max(0.0, 1.0 - t * t)));
+			VERTEX.y -= y_drop;
+			world_pos.y -= y_drop;
+
+			float sin_a = t;
+			float cos_a = sqrt(max(0.0, 1.0 - t * t));
+			vec3 n_world = normalize(vec3(dir.x * sin_a, cos_a, dir.y * sin_a));
+			NORMAL = normalize((inverse(MODEL_MATRIX) * vec4(n_world, 0.0)).xyz);
+		}
+	}
+	v_world = world_pos;
 }
 
 void fragment() {
